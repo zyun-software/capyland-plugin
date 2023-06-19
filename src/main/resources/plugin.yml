@@ -1,0 +1,4 @@
+name: capyland
+version: '${version}'
+main: net.ziozyun.capyland.Main
+author: Ziozyun
