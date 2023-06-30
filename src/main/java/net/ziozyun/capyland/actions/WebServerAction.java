@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -15,8 +14,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import net.ziozyun.capyland.helpers.CitizenHelper;
-import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 
 public class WebServerAction {
@@ -60,7 +57,7 @@ public class WebServerAction {
                     @Override
                     public void run() {
                       var player = Bukkit.getPlayer(nickname);
-                      if (player != null) {
+                      if (player != null && player.getGameMode() == GameMode.SPECTATOR) {
                         player.setGameMode(GameMode.SURVIVAL);
                         player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися через Капібота");
 
@@ -72,39 +69,6 @@ public class WebServerAction {
                   }.runTaskLater(_plugin, 20L);
                   code = 200;
                   response = "Авторизація";
-                  break;
-                case "issue-citizenship":
-                  if (nickname != null) {
-                    CitizenHelper.issueCitizenship(nickname);
-                  }
-                  code = 200;
-                  response = "Видача громадянства";
-                  break;
-                case "deprive-of-citizenship":
-                  if (nickname != null) {
-                    CitizenHelper.issueCitizenship(nickname);
-                  }
-                  code = 200;
-                  response = "Позбавлення громадянства";
-                  break;
-                case "update-citizenship":
-                  try {
-                    var serverNicknames = RequestHelper.whitelist();
-                    CitizenHelper.updateCitizenship(serverNicknames);
-
-                    code = 200;
-                    response = "Список громадян оновлено";
-
-                    Bukkit.broadcastMessage(
-                      ChatColor.GREEN + response
-                    );
-                  } catch (Exception exception) {
-                    response = "Помилка оновлення списку громадян";
-
-                    Bukkit.broadcastMessage(
-                      ChatColor.RED + response
-                    );
-                  }
                   break;
                 default:
                   code = 404;

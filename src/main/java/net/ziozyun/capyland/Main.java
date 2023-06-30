@@ -3,7 +3,6 @@ package net.ziozyun.capyland;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.ziozyun.capyland.actions.WebServerAction;
-import net.ziozyun.capyland.helpers.CitizenHelper;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.listeners.OnPlayerInteractListener;
 
@@ -20,21 +19,12 @@ public final class Main extends JavaPlugin {
 
     var server = getServer();
     var pluginManager = server.getPluginManager();
-    var logger = server.getLogger();
 
+    RequestHelper.from = config.getString("from");
     RequestHelper.host = config.getString("host");
     RequestHelper.token = config.getString("token");
 
-    CitizenHelper.plugin = this;
-
-    try {
-      var serverNicknames = RequestHelper.whitelist();
-      CitizenHelper.updateCitizenship(serverNicknames);
-    } catch (Exception exception) {
-      logger.severe("Не вдалося отримати білий список від сервера" + exception.getMessage());
-    }
-
-    var onPlayerInteractListener = new OnPlayerInteractListener();
+    var onPlayerInteractListener = new OnPlayerInteractListener(this);
     pluginManager.registerEvents(onPlayerInteractListener, this);
 
     this._webServerAction.startServer();
