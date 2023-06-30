@@ -11,8 +11,8 @@ services:
     environment:
       EULA: TRUE
       TYPE: SPIGOT
-      VERSION: 1.20.1
-      MEMORY: 16G
+      VERSION: 1.19.3
+      MEMORY: 8G
     tty: true
     stdin_open: true
     restart: unless-stopped

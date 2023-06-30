@@ -8,20 +8,49 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
+import net.md_5.bungee.api.ChatColor;
 import net.ziozyun.capyland.helpers.RequestHelper;
+import net.ziozyun.capyland.helpers.UserHelper;
 
-public class OnInteractMapListener implements Listener {
+public class OnPlayerInteractListener implements Listener {
   private Map<String, MapRenderer> _dictionary = new HashMap<>();
+
+  @EventHandler
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    var player = event.getPlayer();
+
+    var ip = player.getAddress().getAddress().getHostAddress();
+    var nickname = player.getName();
+
+    if (!UserHelper.exists(ip, nickname)) {
+      player.setGameMode(GameMode.SPECTATOR);
+    }
+
+    if (player.getGameMode() == GameMode.SPECTATOR) {
+      player.sendMessage(ChatColor.GOLD + "Необхідна авторизація в Капіботі");
+    }
+  }
+
+  @EventHandler
+  public void onPlayerMove(PlayerMoveEvent event) {
+    var player = event.getPlayer();
+    if (player.getGameMode() == GameMode.SPECTATOR) {
+      event.setCancelled(true);
+    }
+  }
 
   @EventHandler
   public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
@@ -60,7 +89,7 @@ public class OnInteractMapListener implements Listener {
         var renderer = new MapRenderer() {
           @Override
           public void render(MapView mapView, MapCanvas mapCanvas, Player player) {
-            var qrCodeImage = generateQRCode(name);
+            var qrCodeImage = _generateQRCode(name);
             mapCanvas.drawImage(0, 0, qrCodeImage);
           }
         };
@@ -86,7 +115,7 @@ public class OnInteractMapListener implements Listener {
     }
   }
 
-  public static BufferedImage generateQRCode(String text) {
+  private static BufferedImage _generateQRCode(String text) {
     var imageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=" + text;
 
     try {
