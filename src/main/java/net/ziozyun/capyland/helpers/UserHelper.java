@@ -5,8 +5,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
 public class UserHelper {
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
+  public static JavaPlugin plugin;
 
   public static void add(String ip, String nickname) {
     ipDictionary.compute(ip, (key, existingSet) -> {
@@ -29,5 +33,22 @@ public class UserHelper {
       && entry.getValue().contains(nickname));
 
     return result;
+  }
+
+  public static void setSkin(String nickname, String url) {
+    var server = plugin.getServer();
+    var commandSender = server.getConsoleSender();
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "skin clear " + nickname);
+    }, 20L);
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
+    }, 20L);
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "sr applyskin " + nickname);
+    }, 80L);
   }
 }

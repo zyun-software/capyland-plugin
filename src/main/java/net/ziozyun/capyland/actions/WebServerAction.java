@@ -14,6 +14,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 
 public class WebServerAction {
@@ -22,6 +23,7 @@ public class WebServerAction {
   private int _port;
   private String _token;
   private Plugin _plugin;
+  private boolean _isTest;
 
   public WebServerAction(Plugin plugin) {
     _logger = plugin.getLogger();
@@ -30,6 +32,7 @@ public class WebServerAction {
     var config = plugin.getConfig();
     _port = config.getInt("port", 8080);
     _token = config.getString("token", "");
+    _isTest = config.getString("from", "").equalsIgnoreCase("test");
   }
     
   public void startServer() {
@@ -52,21 +55,42 @@ public class WebServerAction {
               var nickname = getRequestParam(exchange, "nickname");
 
               switch (command) {
-                case "to-authorize":
-                  new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                      var player = Bukkit.getPlayer(nickname);
-                      if (player != null && player.getGameMode() == GameMode.SPECTATOR) {
-                        player.setGameMode(GameMode.SURVIVAL);
-                        player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися через Капібота");
-
-                        var ip = player.getAddress().getAddress().getHostAddress();
-
-                        UserHelper.add(ip, nickname);
+                case "apply-skin":
+                  Bukkit.getScheduler().runTaskLater(_plugin, () -> {
+                    var player = Bukkit.getPlayer(nickname);
+                    if (player != null) {
+                      var skinUrl = RequestHelper.getSkinUrl(nickname);
+                      if (skinUrl != null) {
+                        UserHelper.setSkin(nickname, skinUrl);
                       }
                     }
-                  }.runTaskLater(_plugin, 20L);
+                  }, 20L);
+                  code = 200;
+                  response = "Встановити скін";
+                  break;
+                case "kick":
+                  Bukkit.getScheduler().runTaskLater(_plugin, () -> {
+                    var player = Bukkit.getPlayer(nickname);
+                    if (player != null) {
+                      player.kickPlayer(ChatColor.GOLD + "Вас було вислано за кордон Службою безпеки Долини Капібар");
+                    }
+                  }, 20L);
+                  code = 200;
+                  response = "Кік";
+                  break;
+                case "to-authorize":
+                  Bukkit.getScheduler().runTaskLater(_plugin, () -> {
+                    var player = Bukkit.getPlayer(nickname);
+                    if (player != null && player.getGameMode() == GameMode.SPECTATOR) {
+                      var gameMode = _isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
+                      player.setGameMode(gameMode);
+                      player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися через Капібота");
+
+                      var ip = player.getAddress().getAddress().getHostAddress();
+
+                      UserHelper.add(ip, nickname);
+                    }
+                  }, 20L);
                   code = 200;
                   response = "Авторизація";
                   break;
@@ -103,6 +127,7 @@ public class WebServerAction {
 
       _logger.info("Веб-сервер запущений на порту " + _port);
     } catch (IOException e) {
+      e.printStackTrace();
       _logger.warning("Помилка запуску веб-сервера: " + e.getMessage());
     }
   }

@@ -4,6 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.ziozyun.capyland.actions.WebServerAction;
 import net.ziozyun.capyland.helpers.RequestHelper;
+import net.ziozyun.capyland.helpers.UserHelper;
 import net.ziozyun.capyland.listeners.OnPlayerInteractListener;
 
 public final class Main extends JavaPlugin {
@@ -19,6 +20,8 @@ public final class Main extends JavaPlugin {
 
     var server = getServer();
     var pluginManager = server.getPluginManager();
+
+    UserHelper.plugin = this;
 
     RequestHelper.from = config.getString("from");
     RequestHelper.host = config.getString("host");

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -76,6 +75,27 @@ public class RequestHelper {
     result.addAll(list);
 
     return result;
+  }
+
+  public static String getSkinUrl(String nickname) {
+    var url = host + "/skins/" + nickname + "/main.png";
+    if (isURLValid(url)) {
+      return url;
+    }
+
+    return null;
+  }
+
+  public static boolean isURLValid(String urlString) {
+    try {
+      var url = new URL(urlString);
+      var connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("HEAD");
+      var responseCode = connection.getResponseCode();
+      return (responseCode == HttpURLConnection.HTTP_OK);
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   public static String[] financialAccounts() throws MalformedURLException, ProtocolException, IOException {

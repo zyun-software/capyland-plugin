@@ -42,6 +42,12 @@ public class OnPlayerInteractListener implements Listener {
   @EventHandler
   public void onPlayerLogin(PlayerLoginEvent event) {
       var nickname = event.getPlayer().getName();
+
+      var skinUrl = RequestHelper.getSkinUrl(nickname);
+      if (skinUrl != null) {
+        UserHelper.setSkin(nickname, skinUrl);
+      }
+
       try {
         var whitelist = RequestHelper.whitelist();
         if (!whitelist.contains(nickname)) {
@@ -68,12 +74,15 @@ public class OnPlayerInteractListener implements Listener {
 
     event.setJoinMessage(ChatColor.GOLD + nickname + ChatColor.YELLOW + " завітав на Долину Капібар");
 
+
+
     if (!UserHelper.exists(ip, nickname)) {
       player.setGameMode(GameMode.SPECTATOR);
       player.sendMessage(_needAuth);
       try {
         RequestHelper.sendAuthorizeRequest(nickname);
       } catch (Exception e) {
+        e.printStackTrace();
         Bukkit.getScheduler().runTaskLater(_plugin, () -> {
           player.kickPlayer(ChatColor.RED + "Не вдалося відправити запит на авторизацію в Капібота");
         }, 20L);
