@@ -55,6 +55,6 @@ public class UserHelper {
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "sr applyskin " + nickname);
-    }, 40L);
+    }, 60L);
   }
 }
