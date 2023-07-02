@@ -5,7 +5,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.ziozyun.capyland.actions.WebServerAction;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
-import net.ziozyun.capyland.listeners.OnPlayerInteractListener;
+import net.ziozyun.capyland.listeners.AuthListener;
+import net.ziozyun.capyland.listeners.QRCodeAccountNumberListener;
 
 public final class Main extends JavaPlugin {
   private WebServerAction _webServerAction;
@@ -27,8 +28,11 @@ public final class Main extends JavaPlugin {
     RequestHelper.host = config.getString("host");
     RequestHelper.token = config.getString("token");
 
-    var onPlayerInteractListener = new OnPlayerInteractListener(this);
-    pluginManager.registerEvents(onPlayerInteractListener, this);
+    var authListener = new AuthListener(this);
+    pluginManager.registerEvents(authListener, this);
+
+    var qRCodeAccountNumberListener = new QRCodeAccountNumberListener();
+    pluginManager.registerEvents(qRCodeAccountNumberListener, this);
 
     this._webServerAction.startServer();
   }
