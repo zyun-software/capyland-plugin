@@ -35,6 +35,12 @@ public class UserHelper {
     return result;
   }
 
+  public static void removeNicknameFromAllIPs(String nickname) {
+    for (var nicknames : ipDictionary.values()) {
+      nicknames.remove(nickname);
+    }
+  }
+
   public static void setSkin(String nickname, String url) {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();

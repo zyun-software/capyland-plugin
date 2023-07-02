@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -68,15 +69,16 @@ public class WebServerAction {
                   code = 200;
                   response = "Встановити скін";
                   break;
-                case "kick":
+                case "logout":
                   Bukkit.getScheduler().runTaskLater(_plugin, () -> {
                     var player = Bukkit.getPlayer(nickname);
                     if (player != null) {
-                      player.kickPlayer(ChatColor.GOLD + "Вас було вислано за кордон Службою безпеки Долини Капібар");
+                      player.kickPlayer(ChatColor.GREEN + "Ви успішно вийшли через Капібота");
                     }
+                    UserHelper.removeNicknameFromAllIPs(nickname);
                   }, 20L);
                   code = 200;
-                  response = "Кік";
+                  response = "Вихід з облікового запису";
                   break;
                 case "to-authorize":
                   Bukkit.getScheduler().runTaskLater(_plugin, () -> {
@@ -93,6 +95,27 @@ public class WebServerAction {
                   }, 20L);
                   code = 200;
                   response = "Авторизація";
+                  break;
+                case "update-citizen-list":
+                  Bukkit.getScheduler().runTaskLater(_plugin, () -> {
+                    try {
+                      var whitelist = RequestHelper.whitelist();
+                      for (var player : Bukkit.getOnlinePlayers()) {
+                        var username = player.getName();
+                        if (!whitelist.contains(username)) {
+                          player.kickPlayer(ChatColor.DARK_RED + "Вас схопила Служба безпеки Долини Капібар і вивела за кордон, через те що у вас відсутнє громадянство");
+                          UserHelper.removeNicknameFromAllIPs(username);
+                        }
+                      }
+                    } catch (Exception e) {
+
+                    }
+                    var player = Bukkit.getPlayer(nickname);
+                    if (player != null) {
+                    }
+                  }, 20L);
+                  code = 200;
+                  response = "Оновлення списку громадян";
                   break;
                 default:
                   code = 404;
