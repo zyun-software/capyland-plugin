@@ -1,18 +1,26 @@
 package net.ziozyun.capyland.helpers;
 
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class UserHelper {
+  private static Map<UUID, Inventory> _hiddenInventories = new HashMap<>();
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
   public static JavaPlugin plugin;
 
-  public static void add(String ip, String nickname) {
+  public static void add(Player player) {
+    var ip = player.getAddress().getAddress().getHostAddress();
+    var nickname = player.getName();
+
     ipDictionary.compute(ip, (key, existingSet) -> {
       if (existingSet == null) {
         var newSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -27,7 +35,10 @@ public class UserHelper {
     });
   }
 
-  public static boolean exists(String ip, String nickname) {
+  public static boolean exists(Player player) {
+    var ip = player.getAddress().getAddress().getHostAddress();
+    var nickname = player.getName();
+
     var result = ipDictionary.entrySet().stream()
       .anyMatch(entry -> entry.getKey().equalsIgnoreCase(ip)
       && entry.getValue().contains(nickname));
@@ -47,14 +58,49 @@ public class UserHelper {
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "skin clear " + nickname);
-    }, 20L);
+    }, 10L);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
-    }, 20L);
+    }, 10L);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "sr applyskin " + nickname);
-    }, 60L);
+    }, 80L);
+  }
+
+  public static void createTeam() {
+    var server = plugin.getServer();
+    var commandSender = server.getConsoleSender();
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team add Player");
+      server.dispatchCommand(commandSender, "team modify Player nametagVisibility never");
+    }, 10L);
+  }
+
+  public static void dropTeam() {
+    var server = plugin.getServer();
+    var commandSender = server.getConsoleSender();
+
+    server.dispatchCommand(commandSender, "team remove Player");
+  }
+
+  public static void addToTeam(String nickname) {
+    var server = plugin.getServer();
+    var commandSender = server.getConsoleSender();
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team join Player " + nickname);
+    }, 10L);
+  }
+
+  public static void removeFromTeam(String nickname) {
+    var server = plugin.getServer();
+    var commandSender = server.getConsoleSender();
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team leave " + nickname);
+    }, 10L);
   }
 }

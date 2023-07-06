@@ -1,4 +1,5 @@
 name: Capyland
+api-version: 1.19
 version: '${version}'
 main: net.ziozyun.capyland.Main
 author: Ziozyun

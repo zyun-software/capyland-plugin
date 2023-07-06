@@ -6,7 +6,9 @@ import net.ziozyun.capyland.actions.WebServerAction;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 import net.ziozyun.capyland.listeners.AuthListener;
+import net.ziozyun.capyland.listeners.ChatListener;
 import net.ziozyun.capyland.listeners.QRCodeAccountNumberListener;
+import net.ziozyun.capyland.listeners.ToggleViewTagNicknameListener;
 
 public final class Main extends JavaPlugin {
   private WebServerAction _webServerAction;
@@ -24,6 +26,8 @@ public final class Main extends JavaPlugin {
 
     UserHelper.plugin = this;
 
+    UserHelper.createTeam();
+
     RequestHelper.from = config.getString("from");
     RequestHelper.host = config.getString("host");
     RequestHelper.token = config.getString("token");
@@ -33,6 +37,12 @@ public final class Main extends JavaPlugin {
 
     var qRCodeAccountNumberListener = new QRCodeAccountNumberListener();
     pluginManager.registerEvents(qRCodeAccountNumberListener, this);
+  
+    var toggleViewTagNicknameListener = new ToggleViewTagNicknameListener(this);
+    pluginManager.registerEvents(toggleViewTagNicknameListener, this);
+
+    var chatListener = new ChatListener(this);
+    pluginManager.registerEvents(chatListener, this);
 
     this._webServerAction.startServer();
   }
@@ -40,5 +50,6 @@ public final class Main extends JavaPlugin {
   @Override
   public void onDisable() {
     this._webServerAction.stopServer();
+    UserHelper.dropTeam();
   }
 }

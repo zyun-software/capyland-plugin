@@ -83,14 +83,15 @@ public class WebServerAction {
                 case "to-authorize":
                   Bukkit.getScheduler().runTaskLater(_plugin, () -> {
                     var player = Bukkit.getPlayer(nickname);
-                    if (player != null && player.getGameMode() == GameMode.SPECTATOR) {
-                      var gameMode = _isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
-                      player.setGameMode(gameMode);
-                      player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися через Капібота");
+                    if (player != null) {
+                      if (!UserHelper.exists(player)) {
+                        var gameMode = _isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
+                        player.setGameMode(gameMode);
+                        player.setOp(_isTest);
+                        player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися через Капібота");
 
-                      var ip = player.getAddress().getAddress().getHostAddress();
-
-                      UserHelper.add(ip, nickname);
+                        UserHelper.add(player);
+                      }
                     }
                   }, 20L);
                   code = 200;
@@ -103,15 +104,11 @@ public class WebServerAction {
                       for (var player : Bukkit.getOnlinePlayers()) {
                         var username = player.getName();
                         if (!whitelist.contains(username)) {
-                          player.kickPlayer(ChatColor.DARK_RED + "Вас схопила Служба безпеки Долини Капібар і вивела за кордон, через те що у вас відсутнє громадянство");
+                          player.kickPlayer(ChatColor.DARK_RED + "Вас депортувала Служба безпеки Долини Капібар");
                           UserHelper.removeNicknameFromAllIPs(username);
                         }
                       }
                     } catch (Exception e) {
-
-                    }
-                    var player = Bukkit.getPlayer(nickname);
-                    if (player != null) {
                     }
                   }, 20L);
                   code = 200;
