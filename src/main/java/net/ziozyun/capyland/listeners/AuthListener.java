@@ -11,8 +11,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -29,9 +29,11 @@ import net.ziozyun.capyland.helpers.UserHelper;
 public class AuthListener implements Listener {
   private JavaPlugin _plugin;
   private String _needAuth = ChatColor.GOLD + "Необхідна авторизація в Капіботі";
+  private boolean _isTest;
 
-  public AuthListener(JavaPlugin plugin) {
+  public AuthListener(JavaPlugin plugin, boolean isTest) {
     _plugin = plugin;
+    _isTest = isTest;
   }
 
   @EventHandler
@@ -63,6 +65,7 @@ public class AuthListener implements Listener {
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
+    event.setJoinMessage(ChatColor.GOLD + player.getName() + ChatColor.YELLOW + " завітав на Долину Капібар");
 
     if (!UserHelper.exists(player)) {
       player.setGameMode(GameMode.SPECTATOR);
@@ -76,12 +79,19 @@ public class AuthListener implements Listener {
           player.kickPlayer(ChatColor.RED + "Не вдалося відправити запит на авторизацію в Капібота");
         }, 20L);
       }
+
+      return;
+    }
+
+    if (!player.getName().equals("CapyLand")) {
+      player.setOp(_isTest);
     }
   }
 
   @EventHandler
   public void onPlayerQuit(PlayerQuitEvent event) {
     var player = event.getPlayer();
+    event.setQuitMessage(ChatColor.GOLD + player.getName() + ChatColor.YELLOW + " покинув Долину Капібар");
     if (!player.getName().equals("CapyLand")) {
       player.setOp(false);
     }
@@ -92,25 +102,19 @@ public class AuthListener implements Listener {
     var player = event.getPlayer();
 
     if (!UserHelper.exists(player)) {
+      player.setGameMode(GameMode.SPECTATOR);
       player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
   }
 
   @EventHandler
-  public void onPlayerDropItem(PlayerDropItemEvent event) {
+  public void onPlayerInteract(PlayerInteractEvent event) {
     var player = event.getPlayer();
 
     if (!UserHelper.exists(player)) {
-      event.setCancelled(true);
-    }
-  }
-
-  @EventHandler
-  public void onPlayerInteract(PlayerInteractEvent event) {
-     var player = event.getPlayer();
-
-    if (!UserHelper.exists(player)) {
+      player.setGameMode(GameMode.SPECTATOR);
+      player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
   }
@@ -120,6 +124,8 @@ public class AuthListener implements Listener {
     var player = event.getPlayer();
 
     if (!UserHelper.exists(player)) {
+      player.setGameMode(GameMode.SPECTATOR);
+      player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
   }

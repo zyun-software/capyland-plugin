@@ -1,19 +1,16 @@
 package net.ziozyun.capyland.helpers;
 
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class UserHelper {
-  private static Map<UUID, Inventory> _hiddenInventories = new HashMap<>();
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
   public static JavaPlugin plugin;
 
@@ -102,5 +99,17 @@ public class UserHelper {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "team leave " + nickname);
     }, 10L);
+  }
+
+  public static String getCoordinates(Player player) {
+    var location = player.getLocation();
+
+    var x = location.getBlockX();
+    var y = location.getBlockY();
+    var z = location.getBlockZ();
+
+    var result = "[" + x + ", " + y + ", " + z + "]";
+
+    return result;
   }
 }

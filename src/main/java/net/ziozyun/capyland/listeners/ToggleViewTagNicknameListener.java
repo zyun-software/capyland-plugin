@@ -41,12 +41,15 @@ public class ToggleViewTagNicknameListener implements Listener {
 
   @EventHandler
   public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-    if (!(event.getRightClicked() instanceof Player)) {
+    var clickedEntity = event.getRightClicked();
+    if (!(clickedEntity instanceof Player)) {
       return;
     }
 
-    var nickname = ((Player) event.getRightClicked()).getName();
+    var player = event.getPlayer();
+    var clickedPlayer = (Player) clickedEntity;
+    var displayName = ChatColor.GOLD + clickedPlayer.getName();
 
-    event.getPlayer().sendMessage(ChatColor.YELLOW + "Перед вами " + ChatColor.GOLD);
+    player.sendTitle(displayName, "", 10, 40, 10);
   }
 }
