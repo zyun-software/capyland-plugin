@@ -52,8 +52,13 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    server.dispatchCommand(commandSender, "skin clear " + nickname);
-    server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "skin clear " + nickname);
+    }, 0);
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
+    }, 0);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "sr applyskin " + nickname);
@@ -64,8 +69,10 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    server.dispatchCommand(commandSender, "team add Player");
-    server.dispatchCommand(commandSender, "team modify Player nametagVisibility never");
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team add Player");
+      server.dispatchCommand(commandSender, "team modify Player nametagVisibility never");
+    }, 0);
   }
 
   public static void dropTeam() {
@@ -79,14 +86,18 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    server.dispatchCommand(commandSender, "team join Player " + nickname);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team join Player " + nickname);
+    }, 0);
   }
 
   public static void removeFromTeam(String nickname) {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    server.dispatchCommand(commandSender, "team leave " + nickname);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      server.dispatchCommand(commandSender, "team leave " + nickname);
+    }, 0);
   }
 
   public static String getCoordinates(Player player) {

@@ -15,9 +15,11 @@ import net.ziozyun.capyland.listeners.ToggleViewTagNicknameListener;
 
 public final class Main extends JavaPlugin {
   private WebServerAction _webServerAction;
+  private static Main _instance;
 
   @Override
   public void onEnable() {
+    _instance = this;
     var config = getConfig();
 
     var server = getServer();
@@ -42,8 +44,9 @@ public final class Main extends JavaPlugin {
       if (!UserHelper.exists(onlinePlayer)) {
         try {
           RequestHelper.sendAuthorizeRequest(nickname);
-        } catch (Exception e) {}
-      }      
+        } catch (Exception e) {
+        }
+      }
     }
 
     var authListener = new AuthListener(isTest);
@@ -51,14 +54,14 @@ public final class Main extends JavaPlugin {
 
     var qRCodeAccountNumberListener = new QRCodeAccountNumberListener();
     pluginManager.registerEvents(qRCodeAccountNumberListener, this);
-  
+
     var toggleViewTagNicknameListener = new ToggleViewTagNicknameListener();
     pluginManager.registerEvents(toggleViewTagNicknameListener, this);
 
     var chatListener = new ChatListener(radiusSquared);
     pluginManager.registerEvents(chatListener, this);
 
-     _webServerAction = new WebServerAction(this, isTest);
+    _webServerAction = new WebServerAction(this, isTest);
     this._webServerAction.startServer();
   }
 
@@ -66,5 +69,9 @@ public final class Main extends JavaPlugin {
   public void onDisable() {
     this._webServerAction.stopServer();
     UserHelper.dropTeam();
+  }
+
+  public static Main getInstance() {
+    return _instance;
   }
 }

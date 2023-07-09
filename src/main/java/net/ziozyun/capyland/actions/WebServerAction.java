@@ -13,6 +13,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import net.ziozyun.capyland.Main;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 
@@ -35,9 +36,8 @@ public class WebServerAction {
   public void startServer() {
     try {
       httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-      httpServer.createContext("/send-command", new HttpHandler() {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
+      httpServer.createContext("/send-command", exchange -> {
+        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
           String response;
           var code = 400;
 
@@ -54,23 +54,23 @@ public class WebServerAction {
             } else {
               switch (command) {
                 case "apply-skin":
-                  if (player != null) {
-                    var skinUrl = RequestHelper.getSkinUrl(nickname);
-                    if (skinUrl != null) {
-                      UserHelper.setSkin(nickname, skinUrl);
+                    if (player != null) {
+                      var skinUrl = RequestHelper.getSkinUrl(nickname);
+                      if (skinUrl != null) {
+                        UserHelper.setSkin(nickname, skinUrl);
+                      }
                     }
-                  }
-                  code = 200;
-                  response = "Встановити скін";
-                  break;
+                    code = 200;
+                    response = "Встановити скін";
+                    break;
                 case "logout":
-                  if (player != null) {
-                    player.kickPlayer(ChatColor.GREEN + "Ви успішно вийшли через Капібота");
-                  }
-                  UserHelper.removeNicknameFromAllIPs(nickname);
-                  code = 200;
-                  response = "Вихід з облікового запису";
-                  break;
+                    if (player != null) {
+                      player.kickPlayer(ChatColor.GREEN + "Ви успішно вийшли через Капібота");
+                    }
+                    UserHelper.removeNicknameFromAllIPs(nickname);
+                    code = 200;
+                    response = "Вихід з облікового запису";
+                    break;
                 case "to-authorize":
                   if (player != null && !UserHelper.exists(player)) {
                     var gameMode = isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
@@ -101,16 +101,20 @@ public class WebServerAction {
               }
             }
           } catch (Exception e) {
-              e.printStackTrace();
-              response = "Помилка";
-              code = 500;
+            e.printStackTrace();
+            response = "Помилка";
+            code = 500;
           }
 
-          exchange.sendResponseHeaders(code, response.getBytes().length);
-          var outputStream = exchange.getResponseBody();
-          outputStream.write(response.getBytes());
-          outputStream.close();
-        }
+          try {
+            exchange.sendResponseHeaders(code, response.getBytes().length);
+            var outputStream = exchange.getResponseBody();
+            outputStream.write(response.getBytes());
+            outputStream.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }, 0);
       });
 
       httpServer.setExecutor(null);
