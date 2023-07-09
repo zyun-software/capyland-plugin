@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
@@ -91,11 +93,11 @@ public class QRCodeAccountNumberListener implements Listener {
     var imageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=" + text;
 
     try {
-      var url = new URL(imageUrl);
-      var image = ImageIO.read(url);
+      var uri = new URI(imageUrl);
+      var image = ImageIO.read(uri.toURL());
 
       return image;
-    } catch (IOException e) {
+    } catch (IOException | URISyntaxException e) {
       e.printStackTrace();
       return null;
     }

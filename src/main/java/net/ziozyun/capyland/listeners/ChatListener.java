@@ -1,27 +1,22 @@
 package net.ziozyun.capyland.listeners;
 
+import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.List;
 
 import net.ziozyun.capyland.helpers.UserHelper;
 
 public class ChatListener implements Listener {
-  private JavaPlugin _plugin;
   private double _radiusSquared;
   
-  public ChatListener(JavaPlugin plugin, double radiusSquared) {
-    _plugin = plugin;
+  public ChatListener(double radiusSquared) {
     _radiusSquared = radiusSquared;
   }
 
@@ -87,8 +82,6 @@ public class ChatListener implements Listener {
       deathMessage = ChatColor.YELLOW + _getDeathMessage(damageCause, playerName, deathMessage);
     }
 
-    var defaultDeathMessage = event.getDeathMessage();
-
     event.setDeathMessage(deathMessage);
 
     var coordinates = UserHelper.getCoordinates(player);
@@ -112,7 +105,19 @@ public class ChatListener implements Listener {
       case SUFFOCATION:
         return playerName + " задихнувся у тісному просторі. Легендарна боротьба з повітрям!";
       case FALL:
-        return playerName + " пропустив останню сходинку. Його кроки не виявились рівними!";
+        String[] fallSentences = {
+          playerName + " здійснив високосний стрибок у бездонну пропасть і встановив новий рекорд у категорії \"Найвищий стрибок без парашуту!\"",
+          "Вітаємо " + playerName + " з приземленням на планеті Гравітарія! Він вже вибачився за руйнування асфальту.",
+          playerName + " вирішив перевірити, чи справді на небесах лежить м'яке хмарне ліжко. Виявилося, що навпаки!",
+          "Падіння " + playerName + " було таке шалене, що деякі фізичні закони збентежені. Фізики уже підприємливо посилають йому рахунок за порушення гравітації.",
+          playerName + " прокинувся під час падіння і зрозумів, що його життя буквально перевернулося догори ногами. Ну, або ногами догори головою.",
+          playerName + " відчув себе справжньою суперзіркою під час стрибка з надзвичайно високого міста. Тепер його суперсила - здатність привертати до себе землю!",
+          "Падіння " + playerName + " стало найкращим рекламним трюком для нової гри \"Майнкрафт: Адреналін\". Вже з'явилися пропозиції про укладання контракту.",
+          playerName + " решифрував повідомлення з небес і помилково зрозумів, що \"Помчись до зірок!\" означає \"Запиши себе до списку жертв гравітації!\""
+        };
+
+        var randomFallSentence = _getRandomSentence(fallSentences);
+        return randomFallSentence;
       case FIRE:
         return "Вогонь обняв " + playerName + " і не відпускає. Він стає справжнім гарячим хлопчиком!";
       case FIRE_TICK:
@@ -164,5 +169,13 @@ public class ChatListener implements Listener {
       default:
         return def;
     }
+  }
+
+  private String _getRandomSentence(String[] sentences) {
+    var random = new Random();
+    var randomIndex = random.nextInt(sentences.length);
+    var randomSentence = sentences[randomIndex];
+
+    return randomSentence;
   }
 }

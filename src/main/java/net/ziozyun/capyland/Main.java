@@ -46,16 +46,16 @@ public final class Main extends JavaPlugin {
       }      
     }
 
-    var authListener = new AuthListener(this, isTest);
+    var authListener = new AuthListener(isTest);
     pluginManager.registerEvents(authListener, this);
 
     var qRCodeAccountNumberListener = new QRCodeAccountNumberListener();
     pluginManager.registerEvents(qRCodeAccountNumberListener, this);
   
-    var toggleViewTagNicknameListener = new ToggleViewTagNicknameListener(this);
+    var toggleViewTagNicknameListener = new ToggleViewTagNicknameListener();
     pluginManager.registerEvents(toggleViewTagNicknameListener, this);
 
-    var chatListener = new ChatListener(this, radiusSquared);
+    var chatListener = new ChatListener(radiusSquared);
     pluginManager.registerEvents(chatListener, this);
 
      _webServerAction = new WebServerAction(this, isTest);

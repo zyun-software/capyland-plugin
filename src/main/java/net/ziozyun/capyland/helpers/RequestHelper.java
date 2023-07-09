@@ -1,14 +1,18 @@
 package net.ziozyun.capyland.helpers;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.TreeSet;
 
@@ -17,44 +21,37 @@ public class RequestHelper {
   public static String token;
   public static String from;
 
-  private static String _request(String route, String postData) throws MalformedURLException, ProtocolException, IOException {
-    var url = new URL(host + route);
-
-    var connection = (HttpURLConnection) url.openConnection();
+  private static String _request(String route, String postData)
+      throws MalformedURLException, IOException, URISyntaxException {
+    var uri = new URI(host + route);
+    var connection = (HttpURLConnection) uri.toURL().openConnection();
 
     connection.setRequestMethod("POST");
-
     connection.setRequestProperty("Content-Type", "application/json");
     connection.setRequestProperty("token", token);
     connection.setRequestProperty("from", from);
-
     connection.setDoOutput(true);
 
-    var outputStream = new DataOutputStream(connection.getOutputStream());
-    outputStream.writeBytes(postData);
-    outputStream.flush();
-    outputStream.close();
-
-    var inputStream = connection.getInputStream();
-    var inputStreamReader = new InputStreamReader(inputStream);
-    var reader = new BufferedReader(inputStreamReader);
-
-    String line;
+    try (var outputStream = connection.getOutputStream()) {
+      var postDataBytes = postData.getBytes(StandardCharsets.UTF_8);
+      outputStream.write(postDataBytes);
+      outputStream.flush();
+    }
 
     var response = new StringBuilder();
 
-    while ((line = reader.readLine()) != null) {
-      response.append(line);
+    try (var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        response.append(line);
+      }
     }
 
-    reader.close();
-
-    var result = response.toString();
-
-    return result;
+    return response.toString();
   }
 
-  private static String[] _getStringArray(String route) throws MalformedURLException, ProtocolException, IOException  {
+  private static String[] _getStringArray(String route)
+      throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
     String[] emptyArray = {};
 
     var responseString = _request(route, "");
@@ -66,7 +63,8 @@ public class RequestHelper {
     return result;
   }
 
-  public static TreeSet<String> whitelist() throws MalformedURLException, ProtocolException, IOException {
+  public static TreeSet<String> whitelist()
+      throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
     var array = _getStringArray("/api/whitelist");
     var result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -88,23 +86,28 @@ public class RequestHelper {
 
   public static boolean isURLValid(String urlString) {
     try {
-      var url = new URL(urlString);
-      var connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestMethod("HEAD");
-      var responseCode = connection.getResponseCode();
-      return (responseCode == HttpURLConnection.HTTP_OK);
+      var client = HttpClient.newHttpClient();
+      var request = HttpRequest.newBuilder()
+        .uri(URI.create(urlString))
+        .method("HEAD", HttpRequest.BodyPublishers.noBody())
+        .build();
+      var response = client.send(request, HttpResponse.BodyHandlers.discarding());
+      var responseCode = response.statusCode();
+      return (responseCode == 200);
     } catch (Exception e) {
       return false;
     }
   }
 
-  public static String[] financialAccounts() throws MalformedURLException, ProtocolException, IOException {
+  public static String[] financialAccounts()
+      throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
     var result = _getStringArray("/api/financial-accounts");
 
     return result;
   }
 
-  public static void sendAuthorizeRequest(String nickname) throws MalformedURLException, ProtocolException, IOException {
+  public static void sendAuthorizeRequest(String nickname)
+      throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
     var postData = "{\"nickname\":\"" + URLEncoder.encode(nickname, "UTF-8") + "\"}";
     _request("/api/send-authorize-request", postData);
   }

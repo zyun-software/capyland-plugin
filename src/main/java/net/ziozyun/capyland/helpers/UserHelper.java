@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -53,13 +52,8 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      server.dispatchCommand(commandSender, "skin clear " + nickname);
-    }, 10L);
-
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
-    }, 10L);
+    server.dispatchCommand(commandSender, "skin clear " + nickname);
+    server.dispatchCommand(commandSender, "sr CreateCustom " + nickname + " " + url);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       server.dispatchCommand(commandSender, "sr applyskin " + nickname);
@@ -70,10 +64,8 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      server.dispatchCommand(commandSender, "team add Player");
-      server.dispatchCommand(commandSender, "team modify Player nametagVisibility never");
-    }, 10L);
+    server.dispatchCommand(commandSender, "team add Player");
+    server.dispatchCommand(commandSender, "team modify Player nametagVisibility never");
   }
 
   public static void dropTeam() {
@@ -87,18 +79,14 @@ public class UserHelper {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      server.dispatchCommand(commandSender, "team join Player " + nickname);
-    }, 10L);
+    server.dispatchCommand(commandSender, "team join Player " + nickname);
   }
 
   public static void removeFromTeam(String nickname) {
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      server.dispatchCommand(commandSender, "team leave " + nickname);
-    }, 10L);
+    server.dispatchCommand(commandSender, "team leave " + nickname);
   }
 
   public static String getCoordinates(Player player) {
