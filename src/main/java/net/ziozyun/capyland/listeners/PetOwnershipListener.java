@@ -49,15 +49,17 @@ public class PetOwnershipListener implements Listener {
 
     var tameable = (Tameable) entity;
 
-    if (!tameable.isTamed() || !(tameable.getOwner() instanceof Player)) {
-      return;
-    }
+    if (!player.isOp()) {
+      if (!tameable.isTamed() || !(tameable.getOwner() instanceof Player)) {
+        return;
+      }
 
-    var owner = (Player) tameable.getOwner();
-    if (!owner.getUniqueId().equals(player.getUniqueId()) || !player.isOp()) {
-      player.sendMessage(
-          ChatColor.RED + "Ви не являєтесь власником цієї тварини");
-      return;
+      var owner = (Player) tameable.getOwner();
+      if (!owner.getUniqueId().equals(player.getUniqueId())) {
+        player.sendMessage(
+            ChatColor.RED + "Ви не являєтесь власником цієї тварини");
+        return;
+      }
     }
 
     event.setCancelled(true);
