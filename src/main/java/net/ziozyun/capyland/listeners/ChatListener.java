@@ -5,6 +5,9 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -15,7 +18,7 @@ import net.ziozyun.capyland.helpers.UserHelper;
 
 public class ChatListener implements Listener {
   private double _radiusSquared;
-  
+
   public ChatListener(double radiusSquared) {
     _radiusSquared = radiusSquared;
   }
@@ -33,12 +36,22 @@ public class ChatListener implements Listener {
 
     var coordinates = UserHelper.getCoordinates(player);
 
-    final var message = event.getMessage()
-      .replace("#loc", coordinates)
-      .replace("#корди", coordinates);
+    var message = event.getMessage()
+        .replace("#loc", coordinates)
+        .replace("#корди", coordinates)
+        .replaceAll("[\\r\\n]+", " ")
+        .replaceAll("\\s{2,}", " ");
 
     if (message.startsWith("!")) {
       if (message.length() > 1) {
+        for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
+          var name = onlinePlayer.getName();
+          if (message.contains(name)) {
+            _playLevelUpSound(onlinePlayer);
+            message = message.replace(name, ChatColor.GOLD + name + ChatColor.RESET);
+          }
+        }
+
         Bukkit.broadcastMessage(ChatColor.GOLD + nickname + ChatColor.RESET + ": " + message.substring(1));
       } else {
         player.sendMessage(ChatColor.RED + "Необхідно ввести повідомлення");
@@ -48,12 +61,21 @@ public class ChatListener implements Listener {
     }
 
     var find = false;
-    var text = ChatColor.GOLD + nickname + ChatColor.RESET + ": " + ChatColor.GRAY + message;
+    var text = ChatColor.GOLD + nickname + ChatColor.GRAY + ": " + message;
 
+    var world1 = player.getWorld();
     for (var nearbyPlayer : Bukkit.getOnlinePlayers()) {
-      if (player.getLocation().distanceSquared(nearbyPlayer.getLocation()) <= _radiusSquared) {
+      var world2 = nearbyPlayer.getWorld();
+      if (world1.equals(world2) && player.getLocation().distanceSquared(nearbyPlayer.getLocation()) <= _radiusSquared) {
         var notMe = !nearbyPlayer.getName().equals(nickname);
         var notSpectator = !(nearbyPlayer.getGameMode() == GameMode.SPECTATOR);
+
+        var name = nearbyPlayer.getName();
+        if (message.contains(name)) {
+          _playLevelUpSound(nearbyPlayer);
+          text = text
+            .replace(name, ChatColor.GOLD + name + ChatColor.GRAY);
+        }
 
         if (notMe) {
           nearbyPlayer.sendMessage(text);
@@ -85,7 +107,8 @@ public class ChatListener implements Listener {
     event.setDeathMessage(deathMessage);
 
     var coordinates = UserHelper.getCoordinates(player);
-    player.sendMessage(ChatColor.RED + "Ви склеїли ласти! Бігти за вашими речами сюди: " + ChatColor.GOLD + coordinates);
+    player
+        .sendMessage(ChatColor.RED + "Ви склеїли ласти! Бігти за вашими речами сюди: " + ChatColor.GOLD + coordinates);
   }
 
   private String _getDeathMessage(DamageCause damageCause, String playerName, String def) {
@@ -97,7 +120,8 @@ public class ChatListener implements Listener {
       case CONTACT:
         return playerName + " зіткнувся з чимось твердим... Побачимо його в наступному житті!";
       case ENTITY_ATTACK:
-        return "О, " + playerName + " вразив моб! Чи то шкіра зелена, чи Громадянин " + playerName + " просто необережний?";
+        return "О, " + playerName + " вразив моб! Чи то шкіра зелена, чи Громадянин " + playerName
+            + " просто необережний?";
       case ENTITY_SWEEP_ATTACK:
         return playerName + " влучив усіх мобів навколо себе. Помолімось за їхні душі!";
       case PROJECTILE:
@@ -106,14 +130,21 @@ public class ChatListener implements Listener {
         return playerName + " задихнувся у тісному просторі. Легендарна боротьба з повітрям!";
       case FALL:
         String[] fallSentences = {
-          playerName + " здійснив високосний стрибок у бездонну пропасть і встановив новий рекорд у категорії \"Найвищий стрибок без парашуту!\"",
-          "Вітаємо " + playerName + " з приземленням на планеті Гравітарія! Він вже вибачився за руйнування асфальту.",
-          playerName + " вирішив перевірити, чи справді на небесах лежить м'яке хмарне ліжко. Виявилося, що навпаки!",
-          "Падіння " + playerName + " було таке шалене, що деякі фізичні закони збентежені. Фізики уже підприємливо посилають йому рахунок за порушення гравітації.",
-          playerName + " прокинувся під час падіння і зрозумів, що його життя буквально перевернулося догори ногами. Ну, або ногами догори головою.",
-          playerName + " відчув себе справжньою суперзіркою під час стрибка з надзвичайно високого міста. Тепер його суперсила - здатність привертати до себе землю!",
-          "Падіння " + playerName + " стало найкращим рекламним трюком для нової гри \"Майнкрафт: Адреналін\". Вже з'явилися пропозиції про укладання контракту.",
-          playerName + " решифрував повідомлення з небес і помилково зрозумів, що \"Помчись до зірок!\" означає \"Запиши себе до списку жертв гравітації!\""
+            playerName
+                + " здійснив високосний стрибок у бездонну пропасть і встановив новий рекорд у категорії \"Найвищий стрибок без парашуту!\"",
+            "Вітаємо " + playerName
+                + " з приземленням на планеті Гравітарія! Він вже вибачився за руйнування асфальту.",
+            playerName + " вирішив перевірити, чи справді на небесах лежить м'яке хмарне ліжко. Виявилося, що навпаки!",
+            "Падіння " + playerName
+                + " було таке шалене, що деякі фізичні закони збентежені. Фізики уже підприємливо посилають йому рахунок за порушення гравітації.",
+            playerName
+                + " прокинувся під час падіння і зрозумів, що його життя буквально перевернулося догори ногами. Ну, або ногами догори головою.",
+            playerName
+                + " відчув себе справжньою суперзіркою під час стрибка з надзвичайно високого міста. Тепер його суперсила - здатність привертати до себе землю!",
+            "Падіння " + playerName
+                + " стало найкращим рекламним трюком для нової гри \"Майнкрафт: Адреналін\". Вже з'явилися пропозиції про укладання контракту.",
+            playerName
+                + " решифрував повідомлення з небес і помилково зрозумів, що \"Помчись до зірок!\" означає \"Запиши себе до списку жертв гравітації!\""
         };
 
         var randomFallSentence = _getRandomSentence(fallSentences);
@@ -137,7 +168,8 @@ public class ChatListener implements Listener {
       case LIGHTNING:
         return "Блискавка вдарила " + playerName + ". Він став живим експериментом на проведення електричного струму!";
       case SUICIDE:
-        return playerName + " вирішив покласти край своїм пригодам. Нехай його персонаж піде у вічну піксельну сплячку!";
+        return playerName
+            + " вирішив покласти край своїм пригодам. Нехай його персонаж піде у вічну піксельну сплячку!";
       case STARVATION:
         return playerName + " помирає від голоду. На жаль, в Майнкрафті немає піца-доставки!";
       case POISON:
@@ -177,5 +209,9 @@ public class ChatListener implements Listener {
     var randomSentence = sentences[randomIndex];
 
     return randomSentence;
+  }
+
+  private void _playLevelUpSound(Player player) {
+    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
   }
 }

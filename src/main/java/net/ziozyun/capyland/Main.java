@@ -10,6 +10,8 @@ import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 import net.ziozyun.capyland.listeners.AuthListener;
 import net.ziozyun.capyland.listeners.ChatListener;
+import net.ziozyun.capyland.listeners.JailListener;
+import net.ziozyun.capyland.listeners.PetOwnershipListener;
 import net.ziozyun.capyland.listeners.QRCodeAccountNumberListener;
 import net.ziozyun.capyland.listeners.ToggleViewTagNicknameListener;
 
@@ -60,6 +62,12 @@ public final class Main extends JavaPlugin {
 
     var chatListener = new ChatListener(radiusSquared);
     pluginManager.registerEvents(chatListener, this);
+
+    var jailListener = new JailListener();
+    pluginManager.registerEvents(jailListener, this);
+
+    var petOwnershipListener = new PetOwnershipListener();
+    pluginManager.registerEvents(petOwnershipListener, this);
 
     _webServerAction = new WebServerAction(this, isTest);
     this._webServerAction.startServer();

@@ -10,7 +10,6 @@ import org.bukkit.GameMode;
 import org.bukkit.plugin.Plugin;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import net.ziozyun.capyland.Main;
