@@ -1,12 +1,9 @@
 package net.ziozyun.capyland;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.Math;
 
-import net.md_5.bungee.api.ChatColor;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 import net.ziozyun.capyland.listeners.AuthListener;
