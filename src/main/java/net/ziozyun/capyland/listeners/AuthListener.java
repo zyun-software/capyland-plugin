@@ -1,5 +1,6 @@
 package net.ziozyun.capyland.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,6 +44,15 @@ public class AuthListener implements Listener {
   public void onPlayerJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
     player.setOp(false);
+
+    try {
+      var whitelist = RequestHelper.whitelist();
+      if (!whitelist.contains(player.getName())) {
+        player.kickPlayer(ChatColor.RED + "У вас відсутнє громадянство");
+      }
+    } catch (Exception e) {
+      player.kickPlayer(ChatColor.DARK_RED + "Виникла помилка під час отримання списку громадян");
+    }
 
     if (!UserHelper.isAuthorized(player)) {
       player.setGameMode(GameMode.SPECTATOR);

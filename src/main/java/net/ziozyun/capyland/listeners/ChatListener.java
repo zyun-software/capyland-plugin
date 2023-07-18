@@ -52,7 +52,9 @@ public class ChatListener implements Listener {
 
     if (message.equals("#вихід")) {
       UserHelper.removeFromAuthorized(player);
-      player.sendMessage(ChatColor.GREEN + "Ви успішно вийшли");
+      Bukkit.getScheduler().runTaskLater(UserHelper.plugin, () -> {
+        player.kickPlayer(ChatColor.GREEN + "Ви успішно вийшли");
+      }, 0L);
       return;
     }
 
