@@ -64,12 +64,61 @@ public class ChatListener implements Listener {
       return;
     }
 
+    if (message.equals("#список гостей") && player.isOp()) {
+      var guestList = UserHelper.guestList();
+      player.sendMessage(
+          ChatColor.YELLOW + "Список гостей: " + ChatColor.GOLD + (guestList.equals("") ? "порожній" : guestList));
+      return;
+    }
+
+    var incorrectNickname = ChatColor.RED + "Неправельний псевдонім";
+
+    var addGuest = "#додати гостя ";
+    if (message.contains(addGuest) && player.isOp()) {
+      var guestNickname = message.replace(addGuest, "");
+      if (!UserHelper.isValidNickname(guestNickname)) {
+        player.sendMessage(incorrectNickname);
+
+        return;
+      }
+
+      UserHelper.addToGuestByNickname(guestNickname);
+      player.sendMessage(UserHelper.guests.contains(guestNickname) ? ChatColor.YELLOW + "Гостя вже додано"
+          : ChatColor.GREEN + "Гостя додано");
+
+      return;
+    }
+
+    var removeGuest = "#видалити гостя ";
+    if (message.contains(removeGuest) && player.isOp()) {
+      var guestNickname = message.replace(removeGuest, "");
+      if (!UserHelper.isValidNickname(guestNickname)) {
+        player.sendMessage(incorrectNickname);
+
+        return;
+      }
+
+      var guest = Bukkit.getPlayerExact(guestNickname);
+      if (guest != null) {
+        guest.kickPlayer(ChatColor.RED + "У вас було відібрано статус гостя");
+      }
+
+      UserHelper.removeFromGuestByNickname(guestNickname);
+      player.sendMessage(!UserHelper.guests.contains(guestNickname) ? ChatColor.YELLOW + "Гостя не існує"
+          : ChatColor.GREEN + "Гостя видалено");
+
+      return;
+    }
+
     if (message.equals("#команди")) {
       var text = ChatColor.GOLD + "#скін" + ChatColor.YELLOW + " - оновити скін\n" +
           ChatColor.GOLD + "#вихід" + ChatColor.YELLOW + " - вийти";
 
       if (player.isOp()) {
-        text += "\n" + ChatColor.GOLD + "#громадяни" + ChatColor.YELLOW + " - оновити список громадян";
+        text += "\n" + ChatColor.GOLD + "#громадяни" + ChatColor.YELLOW + " - оновити список громадян" +
+            "\n" + ChatColor.GOLD + "#список гостей" + ChatColor.YELLOW + " - показати список гостей" +
+            "\n" + ChatColor.GOLD + "#додати гостя [псевдонім]" + ChatColor.YELLOW + " - додати гостя" +
+            "\n" + ChatColor.GOLD + "#видалити гостя [псевдонім]" + ChatColor.YELLOW + " - видалити гостя";
       }
 
       player.sendMessage(text);

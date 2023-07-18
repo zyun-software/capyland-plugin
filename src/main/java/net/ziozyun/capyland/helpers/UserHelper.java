@@ -1,9 +1,13 @@
 package net.ziozyun.capyland.helpers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -16,9 +20,35 @@ import net.ziozyun.capyland.helpers.RequestHelper.AuthorizeRequestData;
 
 public class UserHelper {
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
+  public static List<String> guests = new ArrayList<>();
   public static JavaPlugin plugin;
   public static boolean isTest;
   public static String opString;
+
+  public static void addToGuestByNickname(String nickname) {
+    if (!guests.contains(nickname)) {
+      guests.add(nickname);
+    }
+  }
+
+  public static void removeFromGuestByNickname(String nickname) {
+    if (guests.contains(nickname)) {
+      guests.remove(nickname);
+    }
+  }
+
+  public static void clearGuests() {
+    guests.clear();
+  }
+
+  public static boolean isGuest(Player player) {
+    return guests.contains(player.getName());
+  }
+
+  public static String guestList() {
+    var result = String.join(", ", guests);
+    return result;
+  }
 
   public static void addToAuthorized(Player player) {
     var ip = player.getAddress().getAddress().getHostAddress();
@@ -134,13 +164,17 @@ public class UserHelper {
     if (i == max) {
       Bukkit.getScheduler().runTaskLater(plugin, () -> {
         player.kickPlayer(ChatColor.RED + "Час для підтвердження авторизації вичерпано");
-      }, i == 0 ? 0L : 40L);
+      }, 0L);
       return;
     }
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       try {
         var token = RequestHelper.getAuthorizeToken(player);
+        if (token.equals("exit")) {
+          player.kickPlayer(ChatColor.YELLOW + "Ви відхилили запит на авторизацію");
+          return;
+        }
         if (token.equals(data.token)) {
           updateParameters(player);
 
@@ -172,6 +206,7 @@ public class UserHelper {
 
   public static void sendAuthorizeRequest(Player player) {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      player.setGameMode(GameMode.SPECTATOR);
       try {
         var data = RequestHelper.sendAuthorizeRequest(player);
         waitForApproveAuthorizeRequest(player, data, 0);
@@ -187,7 +222,6 @@ public class UserHelper {
       try {
         var whitelist = RequestHelper.whitelist();
         for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
-          onlinePlayer.setGameMode(GameMode.SPECTATOR);
           onlinePlayer.setOp(false);
 
           removeFromAuthorized(onlinePlayer);
@@ -204,5 +238,13 @@ public class UserHelper {
         }
       }
     }, 0L);
+  }
+
+  public static boolean isValidNickname(String username) {
+    var regex = "^[a-zA-Z0-9_]{3,16}$";
+    var pattern = Pattern.compile(regex);
+    var matcher = pattern.matcher(username);
+
+    return matcher.matches();
   }
 }

@@ -1,6 +1,7 @@
 package net.ziozyun.capyland.listeners;
 
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -24,6 +25,10 @@ public class AuthListener implements Listener {
       UserHelper.setSkin(player, skinUrl);
     }
 
+    if (UserHelper.isGuest(player)) {
+      return;
+    }
+
     try {
       var whitelist = RequestHelper.whitelist();
       if (!whitelist.contains(player.getName())) {
@@ -44,6 +49,11 @@ public class AuthListener implements Listener {
     var player = event.getPlayer();
     player.setOp(false);
 
+    if (UserHelper.isGuest(player)) {
+      UserHelper.updateParameters(player);
+      return;
+    }
+
     try {
       var whitelist = RequestHelper.whitelist();
       if (!whitelist.contains(player.getName())) {
@@ -54,8 +64,6 @@ public class AuthListener implements Listener {
     }
 
     if (!UserHelper.isAuthorized(player)) {
-      player.setGameMode(GameMode.SPECTATOR);
-
       UserHelper.sendAuthorizeRequest(player);
 
       return;
@@ -74,7 +82,7 @@ public class AuthListener implements Listener {
   public void onPlayerMove(PlayerMoveEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.isAuthorized(player)) {
+    if (_isLocked(player)) {
       player.setGameMode(GameMode.SPECTATOR);
       event.setCancelled(true);
     }
@@ -84,7 +92,7 @@ public class AuthListener implements Listener {
   public void onPlayerInteract(PlayerInteractEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.isAuthorized(player)) {
+    if (_isLocked(player)) {
       player.setGameMode(GameMode.SPECTATOR);
       event.setCancelled(true);
     }
@@ -94,9 +102,14 @@ public class AuthListener implements Listener {
   public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.isAuthorized(player)) {
+    if (_isLocked(player)) {
       player.setGameMode(GameMode.SPECTATOR);
       event.setCancelled(true);
     }
+  }
+
+  private static boolean _isLocked(Player player) {
+    var result = !UserHelper.isAuthorized(player) && !UserHelper.isGuest(player);
+    return result;
   }
 }

@@ -1,17 +1,8 @@
 package net.ziozyun.capyland.listeners;
 
-import org.bukkit.Material;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
 
 public class JailListener implements Listener {
-  @EventHandler
-  public void onPrepareAnvil(PrepareAnvilEvent event) {
-    if (event.getInventory().contains(Material.NETHER_STAR)) {
-      event.setResult(null);
-    }
-  }
 
   /*
    * @EventHandler
