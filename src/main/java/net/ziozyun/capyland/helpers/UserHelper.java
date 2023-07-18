@@ -6,9 +6,13 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import net.md_5.bungee.api.ChatColor;
+import net.ziozyun.capyland.helpers.RequestHelper.AuthorizeRequestData;
 
 public class UserHelper {
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
@@ -39,8 +43,8 @@ public class UserHelper {
     var nickname = player.getName();
 
     var result = ipDictionary.entrySet().stream()
-      .anyMatch(entry -> entry.getKey().equalsIgnoreCase(ip)
-      && entry.getValue().contains(nickname));
+        .anyMatch(entry -> entry.getKey().equalsIgnoreCase(ip)
+            && entry.getValue().contains(nickname));
 
     return result;
   }
@@ -120,6 +124,85 @@ public class UserHelper {
   }
 
   public static void playLevelUpSound(Player player) {
-    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+    }, 0L);
+  }
+
+  public static void waitForApproveAuthorizeRequest(Player player, AuthorizeRequestData data, int i) {
+    var max = 15;
+    if (i == max) {
+      Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        player.kickPlayer(ChatColor.RED + "Час для підтвердження авторизації вичерпано");
+      }, i == 0 ? 0L : 40L);
+      return;
+    }
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      try {
+        var token = RequestHelper.getAuthorizeToken(player);
+        if (token.equals(data.token)) {
+          updateParameters(player);
+
+          UserHelper.addToAuthorized(player);
+          UserHelper.addToTeam(player);
+
+          player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися за допомогою" + ChatColor.GOLD + " Капібота");
+          return;
+        }
+      } catch (Exception e) {
+        // ігнор
+      }
+
+      player.sendMessage(ChatColor.YELLOW + "Необхідно підтвердити авторизацію в" + ChatColor.GOLD + " Капіботі"
+          + ChatColor.YELLOW + ". Код авторизації: " + ChatColor.GOLD + data.code);
+      waitForApproveAuthorizeRequest(player, data, i + 1);
+    }, i == 0 ? 0L : 40L);
+  }
+
+  public static void updateParameters(Player player) {
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      var gamemode = isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
+      player.setGameMode(gamemode);
+
+      var op = opString.contains(player.getName());
+      player.setOp(op);
+    }, 0L);
+  }
+
+  public static void sendAuthorizeRequest(Player player) {
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      try {
+        var data = RequestHelper.sendAuthorizeRequest(player);
+        waitForApproveAuthorizeRequest(player, data, 0);
+      } catch (Exception e) {
+        e.printStackTrace();
+        player.kickPlayer(ChatColor.RED + "Не вдалося відправити запит на авторизацію в Капібота");
+      }
+    }, 0L);
+  }
+
+  public static void updateTheListOfCitizens() {
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      try {
+        var whitelist = RequestHelper.whitelist();
+        for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
+          onlinePlayer.setGameMode(GameMode.SPECTATOR);
+          onlinePlayer.setOp(false);
+
+          removeFromAuthorized(onlinePlayer);
+          removeFromTeam(onlinePlayer);
+          sendAuthorizeRequest(onlinePlayer);
+
+          if (!whitelist.contains(onlinePlayer.getName())) {
+            onlinePlayer.kickPlayer(ChatColor.RED + "У вас відсутнє громадянство");
+          }
+        }
+      } catch (Exception e) {
+        for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
+          onlinePlayer.kickPlayer(ChatColor.DARK_RED + "Виникла помилка під час отримання списку громадян");
+        }
+      }
+    }, 0L);
   }
 }

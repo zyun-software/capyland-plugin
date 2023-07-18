@@ -46,7 +46,31 @@ public class ChatListener implements Listener {
         player.sendMessage(ChatColor.GREEN + "Скін оновлено");
         return;
       }
-      player.sendMessage(ChatColor.YELLOW + "У вас не встановлено скін в Капіботі");
+      player.sendMessage(ChatColor.YELLOW + "У вас не встановлено скін в" + ChatColor.GOLD + " Капіботі");
+      return;
+    }
+
+    if (message.equals("#вихід")) {
+      UserHelper.removeFromAuthorized(player);
+      player.sendMessage(ChatColor.GREEN + "Ви успішно вийшли");
+      return;
+    }
+
+    if (message.equals("#громадяни") && player.isOp()) {
+      UserHelper.updateTheListOfCitizens();
+      player.sendMessage(ChatColor.GREEN + "Список громадян оновлено");
+      return;
+    }
+
+    if (message.equals("#команди")) {
+      var text = ChatColor.GOLD + "#скін" + ChatColor.YELLOW + " - оновити скін\n" +
+          ChatColor.GOLD + "#вихід" + ChatColor.YELLOW + " - вийти";
+
+      if (player.isOp()) {
+        text += "\n" + ChatColor.GOLD + "#громадяни" + ChatColor.YELLOW + " - оновити список громадян";
+      }
+
+      player.sendMessage(text);
       return;
     }
 

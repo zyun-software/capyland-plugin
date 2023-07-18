@@ -123,7 +123,7 @@ public class RequestHelper {
         + "\",\"code\":" + code + ",\"ip\":\"" + ip + "\"}";
     _request("/api/send-authorize-request", postData);
 
-    var data = new AuthorizeRequestData(token, 23);
+    var data = new AuthorizeRequestData(token, code);
     return data;
   }
 
