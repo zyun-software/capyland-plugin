@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -104,6 +105,15 @@ public class AuthListener implements Listener {
 
     if (_isLocked(player)) {
       player.setGameMode(GameMode.SPECTATOR);
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler
+  public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+    var player = event.getPlayer();
+
+    if (_isLocked(player)) {
       event.setCancelled(true);
     }
   }
