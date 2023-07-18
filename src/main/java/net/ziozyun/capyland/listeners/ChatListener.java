@@ -122,6 +122,8 @@ public class ChatListener implements Listener {
         }
       }
       player.sendMessage(ChatColor.GREEN + "Гостей видалено");
+      UserHelper.clearGuests();
+
       return;
     }
 
