@@ -134,6 +134,7 @@ public class ChatListener implements Listener {
       if (player.isOp()) {
         text += "\n" + ChatColor.GOLD + "#громадяни" + ChatColor.YELLOW + " - оновити список громадян" +
             "\n" + ChatColor.GOLD + "#список гостей" + ChatColor.YELLOW + " - показати список гостей" +
+            "\n" + ChatColor.GOLD + "#видалити гостей" + ChatColor.YELLOW + " - видалити всіх гостей" +
             "\n" + ChatColor.GOLD + "#додати гостя [псевдонім]" + ChatColor.YELLOW + " - додати гостя" +
             "\n" + ChatColor.GOLD + "#видалити гостя [псевдонім]" + ChatColor.YELLOW + " - видалити гостя";
       }
