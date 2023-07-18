@@ -82,9 +82,9 @@ public class ChatListener implements Listener {
         return;
       }
 
-      UserHelper.addToGuestByNickname(guestNickname);
       player.sendMessage(UserHelper.guests.contains(guestNickname) ? ChatColor.YELLOW + "Гостя вже додано"
           : ChatColor.GREEN + "Гостя додано");
+      UserHelper.addToGuestByNickname(guestNickname);
 
       return;
     }
@@ -103,9 +103,9 @@ public class ChatListener implements Listener {
         guest.kickPlayer(ChatColor.RED + "У вас було відібрано статус гостя");
       }
 
-      UserHelper.removeFromGuestByNickname(guestNickname);
       player.sendMessage(!UserHelper.guests.contains(guestNickname) ? ChatColor.YELLOW + "Гостя не існує"
           : ChatColor.GREEN + "Гостя видалено");
+      UserHelper.removeFromGuestByNickname(guestNickname);
 
       return;
     }
