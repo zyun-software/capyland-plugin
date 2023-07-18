@@ -6,14 +6,17 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class UserHelper {
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
   public static JavaPlugin plugin;
+  public static boolean isTest;
+  public static String opString;
 
-  public static void add(Player player) {
+  public static void addToAuthorized(Player player) {
     var ip = player.getAddress().getAddress().getHostAddress();
     var nickname = player.getName();
 
@@ -31,7 +34,7 @@ public class UserHelper {
     });
   }
 
-  public static boolean exists(Player player) {
+  public static boolean isAuthorized(Player player) {
     var ip = player.getAddress().getAddress().getHostAddress();
     var nickname = player.getName();
 
@@ -42,13 +45,15 @@ public class UserHelper {
     return result;
   }
 
-  public static void removeNicknameFromAllIPs(String nickname) {
+  public static void removeFromAuthorized(Player player) {
+    var nickname = player.getName();
     for (var nicknames : ipDictionary.values()) {
       nicknames.remove(nickname);
     }
   }
 
-  public static void setSkin(String nickname, String url) {
+  public static void setSkin(Player player, String url) {
+    var nickname = player.getName();
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
@@ -82,7 +87,8 @@ public class UserHelper {
     server.dispatchCommand(commandSender, "team remove Player");
   }
 
-  public static void addToTeam(String nickname) {
+  public static void addToTeam(Player player) {
+    var nickname = player.getName();
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
@@ -91,7 +97,8 @@ public class UserHelper {
     }, 0);
   }
 
-  public static void removeFromTeam(String nickname) {
+  public static void removeFromTeam(Player player) {
+    var nickname = player.getName();
     var server = plugin.getServer();
     var commandSender = server.getConsoleSender();
 
@@ -110,5 +117,9 @@ public class UserHelper {
     var result = "[" + x + ", " + y + ", " + z + "]";
 
     return result;
+  }
+
+  public static void playLevelUpSound(Player player) {
+    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
   }
 }

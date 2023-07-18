@@ -1,6 +1,8 @@
 package net.ziozyun.capyland.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -13,52 +15,44 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
+import net.ziozyun.capyland.helpers.RequestHelper.AuthorizeRequestData;
 
 public class AuthListener implements Listener {
-  private String _needAuth = ChatColor.GOLD + "Необхідна авторизація в Капіботі";
-  private boolean _isTest;
-
-  public AuthListener(boolean isTest) {
-    _isTest = isTest;
-  }
-
   @EventHandler
   public void onPlayerLogin(PlayerLoginEvent event) {
-    var nickname = event.getPlayer().getName();
+    var player = event.getPlayer();
 
-    var skinUrl = RequestHelper.getSkinUrl(nickname);
+    var skinUrl = RequestHelper.getSkinUrl(player);
     if (skinUrl != null) {
-      UserHelper.setSkin(nickname, skinUrl);
+      UserHelper.setSkin(player, skinUrl);
     }
 
     try {
       var whitelist = RequestHelper.whitelist();
-      if (!whitelist.contains(nickname)) {
+      if (!whitelist.contains(player.getName())) {
         event.disallow(
-          PlayerLoginEvent.Result.KICK_OTHER,
-          ChatColor.RED + "У вас відсутнє громадянство"
-        );
+            PlayerLoginEvent.Result.KICK_OTHER,
+            ChatColor.RED + "У вас відсутнє громадянство");
       }
     } catch (Exception e) {
       e.printStackTrace();
       event.disallow(
-        PlayerLoginEvent.Result.KICK_OTHER,
-        ChatColor.DARK_RED + "Виникла помилка під час отримання списку громадян"
-      );
+          PlayerLoginEvent.Result.KICK_OTHER,
+          ChatColor.DARK_RED + "Виникла помилка під час отримання списку громадян");
     }
   }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
-    event.setJoinMessage(ChatColor.GOLD + player.getName() + ChatColor.YELLOW + " завітав на Долину Капібар");
+    player.setOp(false);
 
-    if (!UserHelper.exists(player)) {
+    if (!UserHelper.isAuthorized(player)) {
       player.setGameMode(GameMode.SPECTATOR);
-      player.sendMessage(_needAuth);
 
       try {
-        RequestHelper.sendAuthorizeRequest(player.getName());
+        var data = RequestHelper.sendAuthorizeRequest(player);
+        _waitForApproveAuthorizeRequest(player, data, 0);
       } catch (Exception e) {
         e.printStackTrace();
         player.kickPlayer(ChatColor.RED + "Не вдалося відправити запит на авторизацію в Капібота");
@@ -67,27 +61,21 @@ public class AuthListener implements Listener {
       return;
     }
 
-    if (!player.getName().equals("CapyLand")) {
-      player.setOp(_isTest);
-    }
+    _updatePlayerParameters(player);
   }
 
   @EventHandler
   public void onPlayerQuit(PlayerQuitEvent event) {
     var player = event.getPlayer();
-    event.setQuitMessage(ChatColor.GOLD + player.getName() + ChatColor.YELLOW + " покинув Долину Капібар");
-    if (!player.getName().equals("CapyLand")) {
-      player.setOp(false);
-    }
+    UserHelper.removeFromTeam(player);
   }
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.exists(player)) {
+    if (!UserHelper.isAuthorized(player)) {
       player.setGameMode(GameMode.SPECTATOR);
-      player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
   }
@@ -96,9 +84,8 @@ public class AuthListener implements Listener {
   public void onPlayerInteract(PlayerInteractEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.exists(player)) {
+    if (!UserHelper.isAuthorized(player)) {
       player.setGameMode(GameMode.SPECTATOR);
-      player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
   }
@@ -107,10 +94,46 @@ public class AuthListener implements Listener {
   public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
     var player = event.getPlayer();
 
-    if (!UserHelper.exists(player)) {
+    if (!UserHelper.isAuthorized(player)) {
       player.setGameMode(GameMode.SPECTATOR);
-      player.sendMessage(_needAuth);
       event.setCancelled(true);
     }
+  }
+
+  private void _waitForApproveAuthorizeRequest(Player player, AuthorizeRequestData data, int i) {
+    Bukkit.getScheduler().runTaskLater(UserHelper.plugin, () -> {
+      var max = 15;
+      if (i == max) {
+        player.kickPlayer(ChatColor.RED + "Час для підтвердження авторизації вичерпано");
+        return;
+      }
+
+      try {
+        var token = RequestHelper.getAuthorizeToken(player);
+        if (token.equals(data.token)) {
+          _updatePlayerParameters(player);
+
+          UserHelper.addToAuthorized(player);
+          UserHelper.addToTeam(player);
+
+          player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися за допомогою" + ChatColor.GOLD + "Капібота");
+          return;
+        }
+      } catch (Exception e) {
+        player.sendMessage("піська");
+        // ігнор
+      }
+
+      player.sendMessage(ChatColor.YELLOW + "Необхідно підтвердити авторизацію в " + ChatColor.GOLD + "Капіботі");
+      _waitForApproveAuthorizeRequest(player, data, i + 1);
+    }, i == 0 ? 0L : 40L);
+  }
+
+  private void _updatePlayerParameters(Player player) {
+    var gamemode = UserHelper.isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
+    player.setGameMode(gamemode);
+
+    var op = UserHelper.opString.contains(player.getName());
+    player.setOp(op);
   }
 }

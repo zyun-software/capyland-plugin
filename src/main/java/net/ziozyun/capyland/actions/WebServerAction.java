@@ -17,7 +17,7 @@ import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 
 public class WebServerAction {
-  private HttpServer httpServer;
+  /*private HttpServer httpServer;
   private Logger logger;
   private int port;
   private String token;
@@ -144,5 +144,5 @@ public class WebServerAction {
     }
 
     return null;
-  }
+  }*/
 }

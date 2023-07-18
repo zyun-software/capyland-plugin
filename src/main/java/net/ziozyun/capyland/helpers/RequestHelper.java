@@ -13,8 +13,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Random;
 import java.util.TreeSet;
+
+import org.bukkit.entity.Player;
 
 public class RequestHelper {
   public static String host;
@@ -57,8 +62,8 @@ public class RequestHelper {
     var responseString = _request(route, "");
 
     var result = responseString.length() > 0
-      ? responseString.split(",")
-      : emptyArray;
+        ? responseString.split(",")
+        : emptyArray;
 
     return result;
   }
@@ -75,7 +80,8 @@ public class RequestHelper {
     return result;
   }
 
-  public static String getSkinUrl(String nickname) {
+  public static String getSkinUrl(Player player) {
+    var nickname = player.getName();
     var url = host + "/skins/" + nickname + "/main.png";
     if (isURLValid(url)) {
       return url;
@@ -88,9 +94,9 @@ public class RequestHelper {
     try {
       var client = HttpClient.newHttpClient();
       var request = HttpRequest.newBuilder()
-        .uri(URI.create(urlString))
-        .method("HEAD", HttpRequest.BodyPublishers.noBody())
-        .build();
+          .uri(URI.create(urlString))
+          .method("HEAD", HttpRequest.BodyPublishers.noBody())
+          .build();
       var response = client.send(request, HttpResponse.BodyHandlers.discarding());
       var responseCode = response.statusCode();
       return (responseCode == 200);
@@ -106,9 +112,49 @@ public class RequestHelper {
     return result;
   }
 
-  public static void sendAuthorizeRequest(String nickname)
+  public static AuthorizeRequestData sendAuthorizeRequest(Player player)
       throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
-    var postData = "{\"nickname\":\"" + URLEncoder.encode(nickname, "UTF-8") + "\"}";
+    var ip = player.getAddress().getAddress().getHostAddress();
+    var nickname = player.getName();
+    var random = new Random();
+    var code = random.nextInt(900) + 100;
+    var token = generateToken(32);
+    var postData = "{\"nickname\":\"" + URLEncoder.encode(nickname, "UTF-8") + "\",\"token\":\"" + token
+        + "\",\"code\":" + code + ",\"ip\":\"" + ip + "\"}";
     _request("/api/send-authorize-request", postData);
+
+    var data = new AuthorizeRequestData(token, 23);
+    return data;
+  }
+
+  public static String getAuthorizeToken(Player player)
+      throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
+    var nickname = player.getName();
+    var postData = "{\"nickname\":\"" + URLEncoder.encode(nickname, "UTF-8") + "\"}";
+    var token = _request("/api/get-authorize-token", postData);
+
+    return token;
+  }
+
+  private static final SecureRandom _random = new SecureRandom();
+
+  public static String generateToken(int length) {
+    var bytes = new byte[length];
+    _random.nextBytes(bytes);
+    var result = Base64
+        .getEncoder()
+        .encodeToString(bytes);
+
+    return result;
+  }
+
+  public static class AuthorizeRequestData {
+    public String token;
+    public int code;
+
+    public AuthorizeRequestData(String token, int code) {
+      this.token = token;
+      this.code = code;
+    }
   }
 }
