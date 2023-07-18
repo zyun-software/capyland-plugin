@@ -52,6 +52,7 @@ public class AuthListener implements Listener {
 
     if (UserHelper.isGuest(player)) {
       UserHelper.updateParameters(player);
+      UserHelper.addToTeam(player);
       return;
     }
 
