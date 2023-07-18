@@ -181,6 +181,7 @@ public class UserHelper {
           UserHelper.addToTeam(player);
 
           player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися за допомогою" + ChatColor.GOLD + " Капібота");
+          playLevelUpSound(player);
           return;
         }
       } catch (Exception e) {
