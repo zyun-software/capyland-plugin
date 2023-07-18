@@ -112,6 +112,19 @@ public class ChatListener implements Listener {
       return;
     }
 
+    if (message.equals("#видалити гостей") && player.isOp()) {
+      for (var guestNickname : UserHelper.guests) {
+        var guest = Bukkit.getPlayerExact(guestNickname);
+        if (guest != null) {
+          Bukkit.getScheduler().runTaskLater(UserHelper.plugin, () -> {
+            guest.kickPlayer(ChatColor.RED + "У вас було відібрано статус гостя");
+          }, 0L);
+        }
+      }
+      player.sendMessage(ChatColor.GREEN + "Гостей видалено");
+      return;
+    }
+
     if (message.equals("#команди")) {
       var text = ChatColor.GOLD + "#скін" + ChatColor.YELLOW + " - оновити скін\n" +
           ChatColor.GOLD + "#вихід" + ChatColor.YELLOW + " - вийти";
