@@ -102,7 +102,7 @@ public class ChatListener implements Listener {
       if (guest != null) {
         Bukkit.getScheduler().runTaskLater(UserHelper.plugin, () -> {
           guest.kickPlayer(ChatColor.RED + "У вас було відібрано статус гостя");
-        , 0L);
+        }, 0L);
       }
 
       player.sendMessage(!UserHelper.guests.contains(guestNickname) ? ChatColor.YELLOW + "Гостя не існує"
