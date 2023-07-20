@@ -72,6 +72,7 @@ public class AuthListener implements Listener {
     }
 
     UserHelper.updateParameters(player);
+    UserHelper.addToTeam(player);
   }
 
   @EventHandler
