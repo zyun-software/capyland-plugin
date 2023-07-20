@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -234,22 +235,30 @@ public class JailListener implements Listener {
       return;
     }
 
+    var canTeleport = !player.isGliding() && !player.isFlying();
+
+    if (!canTeleport) {
+      player.sendMessage(ChatColor.RED + "Сюди не можна перемістити в'язня(-ів)");
+    }
+
     for (var boundEntry : _bound) {
       var nicknames = boundEntry.split(":");
       if (nicknames.length == 2 && nicknames[0].equals(nickname)) {
         var prisoner = Bukkit.getPlayer(nicknames[1]);
         if (prisoner != null) {
-          UserHelper.teleportPlayerToPlayer(prisoner, player);
-          var location = player.getLocation();
-          prisoner.setBedSpawnLocation(location, true);
-          if (UserHelper.isBlockUnder(prisoner, Material.DIAMOND_BLOCK, distance)) {
-            prisoner.setGameMode(GameMode.ADVENTURE);
-            var name = prisoner.getName();
-            if (!_jail.contains(name)) {
-              _jail.add(name);
-              FileHelper.write(_jailFileName, _jail);
+          if (canTeleport) {
+            UserHelper.teleportPlayerToPlayer(prisoner, player);
+            var location = player.getLocation();
+            prisoner.setBedSpawnLocation(location, true);
+            if (UserHelper.isBlockUnder(prisoner, Material.DIAMOND_BLOCK, distance)) {
+              prisoner.setGameMode(GameMode.ADVENTURE);
+              var name = prisoner.getName();
+              if (!_jail.contains(name)) {
+                _jail.add(name);
+                FileHelper.write(_jailFileName, _jail);
+              }
+              prisoner.sendMessage(ChatColor.YELLOW + "Ви потрапили до в'язниці");
             }
-            prisoner.sendMessage(ChatColor.YELLOW + "Ви потрапили до в'язниці");
           }
         }
       }
