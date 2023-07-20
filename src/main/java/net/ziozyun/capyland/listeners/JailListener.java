@@ -235,7 +235,7 @@ public class JailListener implements Listener {
       return;
     }
 
-    var canTeleport = !player.isGliding() && !player.isFlying();
+    var canTeleport = player.isOnGround();
 
     if (!canTeleport) {
       player.sendMessage(ChatColor.RED + "Сюди не можна перемістити в'язня(-ів)");
