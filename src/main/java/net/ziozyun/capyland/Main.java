@@ -4,6 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.Math;
 
+import net.ziozyun.capyland.helpers.FileHelper;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 import net.ziozyun.capyland.listeners.AuthListener;
@@ -23,6 +24,8 @@ public final class Main extends JavaPlugin {
 
     var from = config.getString("from", "test");
 
+    FileHelper.dataFolder = getDataFolder();
+
     RequestHelper.from = from;
     RequestHelper.host = config.getString("host", "");
     RequestHelper.token = config.getString("token", "");
@@ -30,9 +33,9 @@ public final class Main extends JavaPlugin {
     UserHelper.plugin = this;
     UserHelper.opString = config.getString("op", "");
     UserHelper.isTest = from.equalsIgnoreCase("test");
+    UserHelper.guests = FileHelper.readAsList("guests.txt");
 
     UserHelper.createTeam();
-
     UserHelper.updateTheListOfCitizens();
 
     var authListener = new AuthListener();

@@ -3,6 +3,7 @@ package net.ziozyun.capyland.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -10,6 +11,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import net.ziozyun.capyland.helpers.FileHelper;
 import net.ziozyun.capyland.helpers.RequestHelper;
 import net.ziozyun.capyland.helpers.UserHelper;
 
@@ -25,7 +27,7 @@ public class ChatListener implements Listener {
     event.setCancelled(true);
     var player = event.getPlayer();
 
-    if (!UserHelper.isAuthorized(player)) {
+    if (!UserHelper.isAuthorized(player) && !UserHelper.isGuest(player)) {
       return;
     }
 
@@ -144,11 +146,16 @@ public class ChatListener implements Listener {
     }
 
     if (message.startsWith("!")) {
+      if (FileHelper.readAsList("jail.txt").contains(nickname)) {
+        player.sendMessage(ChatColor.RED + "Вам не доступний глобальний чат");
+        return;
+      }
+
       if (message.length() > 1) {
         for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
           var name = onlinePlayer.getName();
           if (message.contains(name)) {
-            UserHelper.playLevelUpSound(onlinePlayer);
+            UserHelper.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP);
             message = message.replace(name, ChatColor.GOLD + name + ChatColor.RESET);
           }
         }
@@ -173,7 +180,7 @@ public class ChatListener implements Listener {
 
         var name = nearbyPlayer.getName();
         if (message.contains(name)) {
-          UserHelper.playLevelUpSound(nearbyPlayer);
+          UserHelper.playSound(nearbyPlayer, Sound.ENTITY_PLAYER_LEVELUP);
           text = text
               .replace(name, ChatColor.GOLD + name + ChatColor.GRAY);
         }

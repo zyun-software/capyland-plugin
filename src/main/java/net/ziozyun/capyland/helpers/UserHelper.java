@@ -1,6 +1,5 @@
 package net.ziozyun.capyland.helpers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,8 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,25 +20,30 @@ import net.ziozyun.capyland.helpers.RequestHelper.AuthorizeRequestData;
 
 public class UserHelper {
   private static Map<String, Set<String>> ipDictionary = new HashMap<>();
-  public static List<String> guests = new ArrayList<>();
+  public static List<String> guests;
   public static JavaPlugin plugin;
   public static boolean isTest;
   public static String opString;
 
+  private static String _guestsFileName = "guests.txt";
+
   public static void addToGuestByNickname(String nickname) {
     if (!guests.contains(nickname)) {
       guests.add(nickname);
+      FileHelper.write(_guestsFileName, guests);
     }
   }
 
   public static void removeFromGuestByNickname(String nickname) {
     if (guests.contains(nickname)) {
       guests.remove(nickname);
+      FileHelper.write(_guestsFileName, guests);
     }
   }
 
   public static void clearGuests() {
     guests.clear();
+    FileHelper.write(_guestsFileName, guests);
   }
 
   public static boolean isGuest(Player player) {
@@ -152,22 +158,19 @@ public class UserHelper {
     return result;
   }
 
-  public static void playLevelUpSound(Player player) {
+  public static void playSound(Player player, Sound sound) {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+      player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
     }, 0L);
   }
 
   public static void waitForApproveAuthorizeRequest(Player player, AuthorizeRequestData data, int i) {
-    var max = 15;
-    if (i == max) {
-      Bukkit.getScheduler().runTaskLater(plugin, () -> {
-        player.kickPlayer(ChatColor.RED + "Час для підтвердження авторизації вичерпано");
-      }, 0L);
-      return;
-    }
-
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      var max = 15;
+      if (i == max) {
+        player.kickPlayer(ChatColor.RED + "Час для підтвердження авторизації вичерпано");
+        return;
+      }
       try {
         var token = RequestHelper.getAuthorizeToken(player);
         if (token.equals("exit")) {
@@ -181,7 +184,7 @@ public class UserHelper {
           UserHelper.addToTeam(player);
 
           player.sendMessage(ChatColor.GREEN + "Ви успішно авторизувалися за допомогою" + ChatColor.GOLD + " Капібота");
-          playLevelUpSound(player);
+          UserHelper.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
           return;
         }
       } catch (Exception e) {
@@ -197,6 +200,10 @@ public class UserHelper {
   public static void updateParameters(Player player) {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       var gamemode = isTest ? GameMode.CREATIVE : GameMode.SURVIVAL;
+      if (FileHelper.readAsList("jail.txt").contains(player.getName())) {
+        gamemode = GameMode.ADVENTURE;
+      }
+
       player.setGameMode(gamemode);
 
       var op = opString.contains(player.getName());
@@ -224,11 +231,18 @@ public class UserHelper {
         for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
           onlinePlayer.setOp(false);
 
-          removeFromAuthorized(onlinePlayer);
-          removeFromTeam(onlinePlayer);
-          sendAuthorizeRequest(onlinePlayer);
+          var notGuest = !UserHelper.isGuest(onlinePlayer);
+          if (notGuest) {
+            removeFromAuthorized(onlinePlayer);
+            removeFromTeam(onlinePlayer);
+            sendAuthorizeRequest(onlinePlayer);
+          } else {
+            addToTeam(onlinePlayer);
+          }
 
-          if (!whitelist.contains(onlinePlayer.getName())) {
+          updateParameters(onlinePlayer);
+
+          if (!whitelist.contains(onlinePlayer.getName()) && notGuest) {
             onlinePlayer.kickPlayer(ChatColor.RED + "У вас відсутнє громадянство");
           }
         }
@@ -246,5 +260,40 @@ public class UserHelper {
     var matcher = pattern.matcher(username);
 
     return matcher.matches();
+  }
+
+  public static boolean isMaterialInMainHand(Player player, Material material) {
+    var mainHandItem = player.getEquipment().getItemInMainHand();
+    var result = mainHandItem != null && mainHandItem.getType() == material;
+
+    return result;
+  }
+
+  public static void clearHeldItemSlot(Player player) {
+    var inventory = player.getInventory();
+    inventory.clear(inventory.getHeldItemSlot());
+    player.updateInventory();
+  }
+
+  public static void teleportPlayerToPlayer(Player playerToTeleport, Player destinationPlayer) {
+    playerToTeleport.teleport(destinationPlayer);
+
+    var direction = destinationPlayer.getLocation().getDirection();
+    playerToTeleport.setVelocity(direction);
+  }
+
+  public static boolean isBlockUnder(Player player, Material block, int distance) {
+    var playerLocation = player.getLocation();
+
+    for (var y = playerLocation.getBlockY(); y >= playerLocation.getBlockY() - distance; y--) {
+      var blockLocation = new Location(player.getWorld(), playerLocation.getBlockX(), y, playerLocation.getBlockZ());
+      var blockType = blockLocation.getBlock().getType();
+
+      if (blockType == block) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
