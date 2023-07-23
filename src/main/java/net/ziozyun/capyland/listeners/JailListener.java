@@ -92,7 +92,8 @@ public class JailListener implements Listener {
       return;
     }
 
-    if (UserHelper.isMaterialInMainHand(attacker, Material.STRING) && _locked.contains(targetNickname)) {
+    if (UserHelper.isMaterialInMainHand(attacker, Material.STRING)
+        && (_locked.contains(targetNickname) || _jail.contains(targetNickname))) {
       event.setCancelled(true);
       UserHelper.clearHeldItemSlot(attacker);
       _locked.remove(targetNickname);
