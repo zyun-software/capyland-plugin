@@ -1,4 +1,2 @@
-.gradle
-.minecraft-data
 bin
-build
+target

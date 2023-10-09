@@ -1,4 +1,15 @@
-name: capyland
-version: '${version}'
-main: net.ziozyun.capyland.Main
-author: Ziozyun
+name: CapyLand
+version: 1.0
+api-version: 1.20
+author: ZyunSoftware - CapyDevMC
+main: com.zyunsoftware.capydevmc.app.CapylandPlugin
+description: Основний плагін Долини Капібар
+
+depends:
+  - Multiverse-Core
+  - CoreProtect
+
+commands:
+  teleportworld:
+    description: Перекинути гравця в інший світ
+    usage: /teleportworld [ім'я_світу]

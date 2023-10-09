@@ -1,4 +1,19 @@
-run:
-	docker compose down
-	docker compose run --rm gradle gradle build
-	docker compose run -p 25565:25565 --rm mc
+#!/usr/bin/make
+
+.PHONY: maven
+
+SHELL = /bin/sh
+
+CURRENT_UID := $(shell id -u)
+CURRENT_GID := $(shell id -g)
+
+export CURRENT_UID
+export CURRENT_GID
+
+ifneq (,$(wildcard ./.env))
+	include .env
+	export
+endif
+
+maven:
+	docker compose run --rm maven bash
