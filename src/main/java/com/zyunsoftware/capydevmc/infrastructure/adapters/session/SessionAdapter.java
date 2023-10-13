@@ -54,8 +54,8 @@ public class SessionAdapter implements SessionRepository {
   public void create(String nickname, String ip) {
     try (Connection connection = Api.getMysqlConnection()) {
       String insertSql =
-        "INSERT INTO capyland_sessions (user_id, ip, application, last_used) " + 
-        "VALUES ((SELECT id FROM capyland_users WHERE nickname = ?), ?, 'minecraft', NOW())";
+        "INSERT INTO capyland_sessions (user_id, ip, application) " + 
+        "VALUES ((SELECT id FROM capyland_users WHERE nickname = ?), ?, 'minecraft')";
 
       PreparedStatement preparedStatement = connection.prepareStatement(insertSql);
       preparedStatement.setString(1, nickname);
@@ -68,17 +68,16 @@ public class SessionAdapter implements SessionRepository {
   }
 
   @Override
-  public void remove(String nickname, String ip) {
+  public void remove(String nickname) {
     try (Connection connection = Api.getMysqlConnection()) {
       String removeSql =
         "DELETE s " + 
         "FROM capyland_sessions s " +
         "JOIN capyland_users u ON s.user_id = u.id " +
-        "WHERE u.nickname = ? AND s.ip = ? AND s.application = 'minecraft'";
+        "WHERE u.nickname = ? AND s.application = 'minecraft'";
 
       PreparedStatement preparedStatement = connection.prepareStatement(removeSql);
       preparedStatement.setString(1, nickname);
-      preparedStatement.setString(2, ip);
 
       preparedStatement.executeUpdate();
     } catch (SQLException e) {

@@ -7,5 +7,5 @@ public interface SessionRepository {
 
   void create(String nickname, String ip);
 
-  void remove(String nickname, String ip);
+  void remove(String nickname);
 }

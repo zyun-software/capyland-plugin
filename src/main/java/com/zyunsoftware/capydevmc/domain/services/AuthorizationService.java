@@ -153,7 +153,7 @@ public class AuthorizationService {
       return;
     }
 
-    _sessionRepository.remove(nickname, ip);
+    _sessionRepository.remove(nickname);
 
     controlSelected();
   }

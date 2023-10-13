@@ -44,7 +44,6 @@ public class MigrationAdapter implements MigrationRepository {
         + "user_id INT NOT NULL,"
         + "ip VARCHAR(15) NOT NULL,"
         + "application VARCHAR(255) NOT NULL,"
-        + "last_used DATETIME NOT NULL,"
         + "PRIMARY KEY (user_id, ip, application),"
         + "FOREIGN KEY (user_id) REFERENCES capyland_users(id),"
         + "INDEX idx_application (application)"
