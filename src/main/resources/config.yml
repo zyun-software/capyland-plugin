@@ -1,3 +1,30 @@
-mysql-url: jdbc:mysql://localhost:3306/db
-mysql-user: root
-mysql-password: secret
+mysql.url: jdbc:mysql://localhost:3306/db
+mysql.user: root
+mysql.password: secret
+
+world.lobby: world_auth
+world.main: world
+
+title.register.text: §6Потрібна реєстрація
+title.register.sub: §aВведіть §6/register §r§6<пароль> <повтор пароля>
+title.login.text: §6Потрібна авторизація
+title.login.sub: §aВведіть §6/login §6<пароль>
+title.login.success.text: §aВи успішно авторизувалися
+title.login.success.sub: §6Пройдіть в портал для телепортації в основний світ
+title.portal.unapproved: §cВашого персонажа не підтверджено
+title.lobby: §cВи вже в лобі.
+
+message.command.plugins: Список плагінів недоступний
+message.command.help: Текст довідки
+message.command.register.console: Зареєструватися може лише гравець!
+message.command.register.args: §cБудь ласка, введіть пароль і повторіть його.
+message.command.register.different-passwords: §cПаролі не співпадають. Будь ласка, введіть однакові паролі.
+message.command.register.already-registered: §cВи вже зареєстровані.
+message.command.login.console: Авторизуватися може лише гравець!
+message.command.login.args: §cБудь ласка, введіть пароль.
+message.command.login.registration-is-required: §cНеобхідно зареєструватися.
+message.command.login.already-authorized: §cВи вже авторизовані.
+message.command.login.invalid-password: §cПароль не вірний.
+message.command.logout.console: Вийти може лише гравець!
+message.command.logout.unauthorized: §cВи не авторизовані.
+message.command.lobby.console: Повернутися до лобі може лише гравець!

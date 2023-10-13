@@ -2,34 +2,56 @@ package com.zyunsoftware.capydevmc.app;
 
 import java.util.logging.Logger;
 
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import com.zyunsoftware.capydevmc.app.actions.commands.TeleportWorldCommand;
+import com.zyunsoftware.capydevmc.app.actions.commands.LobbyCommand;
+import com.zyunsoftware.capydevmc.app.actions.commands.LoginCommand;
+import com.zyunsoftware.capydevmc.app.actions.commands.LogoutCommand;
+import com.zyunsoftware.capydevmc.app.actions.commands.RegisterCommand;
+import com.zyunsoftware.capydevmc.app.actions.listeners.AuthorizationListener;
+import com.zyunsoftware.capydevmc.app.actions.listeners.ServerCommandOverwritingListener;
 
 public class CapylandPlugin extends JavaPlugin {
-    private static CapylandPlugin _instancePlugin;
+  private static CapylandPlugin _instancePlugin;
 
-    private Logger _logger;
+  private Logger _logger;
 
-    public CapylandPlugin() {
-        saveDefaultConfig();
-        _instancePlugin = this;
-        _logger = getLogger();
-    }
+  public CapylandPlugin() {
+    saveDefaultConfig();
+    _instancePlugin = this;
+    _logger = getLogger();
+  }
 
-    @Override
-    public void onEnable() {
-        DependencyInjection.getMigrationRepository().migrate();
+  @Override
+  public void onEnable() {
+    DependencyInjection.getMigrationRepository().migrate();
 
-        getCommand("teleportworld").setExecutor(new TeleportWorldCommand());
-    }
+    PluginManager pluginManager = getServer().getPluginManager();
 
-    @Override
-    public void onDisable() {
-        _logger.info("Плагін вимкнено.");
-    }
+    pluginManager.registerEvents(new AuthorizationListener(), this);
+    pluginManager.registerEvents(new ServerCommandOverwritingListener(), this);
 
-    public static CapylandPlugin getInstance() {
-        return _instancePlugin;
-    }
+    getCommand("register").setExecutor(new RegisterCommand());
+    getCommand("login").setExecutor(new LoginCommand());
+    getCommand("logout").setExecutor(new LogoutCommand());
+    getCommand("lobby").setExecutor(new LobbyCommand());
+
+    new BukkitRunnable() {
+      @Override
+      public void run() {
+        DependencyInjection.getAuthorizationService().controlAll();
+      }
+    }.runTaskTimer(this, 0, 20);
+  }
+
+  @Override
+  public void onDisable() {
+    _logger.info("Плагін вимкнено.");
+  }
+
+  public static CapylandPlugin getInstance() {
+    return _instancePlugin;
+  }
 }

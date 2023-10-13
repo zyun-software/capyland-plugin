@@ -9,15 +9,9 @@ public class ConfigUtility {
     return CapylandPlugin.getInstance().getConfig();
   }
 
-  public static String getMysqlUrl() {
-    return _getConfig().getString("mysql-url", "jdbc:mysql://localhost:3306/db");
-  }
+  public static String getString(String key) {
+    String result = _getConfig().getString(key, key);
 
-  public static String getMysqlUser() {
-    return _getConfig().getString("mysql-user", "root");
-  }
-
-  public static String getMysqlPassword() {
-    return _getConfig().getString("mysql-password", "secret");
+    return result;
   }
 }

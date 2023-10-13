@@ -7,9 +7,21 @@ description: Основний плагін Долини Капібар
 
 depends:
   - Multiverse-Core
-  - CoreProtect
+  - TAB
 
 commands:
-  teleportworld:
-    description: Перекинути гравця в інший світ
-    usage: /teleportworld [ім'я_світу]
+  register:
+    description: Реєстрація
+    usage: /register <пароль> <повторення паролю>
+
+  login:
+    description: Авторизація
+    usage: /login <пароль>
+
+  logout:
+    description: Вийти
+    usage: /logout
+
+  lobby:
+    description: Повернутися до лобі
+    usage: /lobby
