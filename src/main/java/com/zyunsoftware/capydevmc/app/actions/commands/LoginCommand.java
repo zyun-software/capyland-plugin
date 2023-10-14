@@ -18,18 +18,11 @@ public class LoginCommand implements CommandExecutor {
       return true;
     }
 
-    if (args.length != 1) {
-      sender.sendMessage(ConfigUtility.getString("message.command.login.args"));
-      return true;
-    }
-    
-    String password = args[0];
-
     AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
     MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
 
     minecraftRepository.selectPlayer(sender.getName());
-    minecraftRepository.setPassword(password);
+    minecraftRepository.setArgs(args);
 
     authorizationService.login();
 

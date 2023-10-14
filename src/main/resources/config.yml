@@ -12,7 +12,7 @@ title.login.sub: §aВведіть §6/login §6<пароль>
 title.login.success.text: §aВи успішно авторизувалися
 title.login.success.sub: §6Пройдіть в портал для телепортації в основний світ
 title.portal.unapproved: §cВашого персонажа не підтверджено
-title.lobby: §cВи вже в лобі.
+title.lobby: §cВи вже в лобі
 
 message.command.plugins: Список плагінів недоступний
 message.command.help: Текст довідки
@@ -28,3 +28,9 @@ message.command.login.invalid-password: §cПароль не вірний.
 message.command.logout.console: Вийти може лише гравець!
 message.command.logout.unauthorized: §cВи не авторизовані.
 message.command.lobby.console: Повернутися до лобі може лише гравець!
+message.command.change-password.args: §cБудь ласка, введіть пароль, повторіть його і старий пароль.
+message.command.change-password.changed: §aПароль змінено.
+message.hidden-command.approve-player.not-found: §cГравця для підтвердження не знайдено.
+message.hidden-command.approve-player.approved: §aГравця підтверджено.
+message.hidden-command.approve-player.canceled: §aПідтвердження гравця скасовано.
+message.hidden-command.approve-player.not-changed: §cПідтвердження гравця не було змінено.

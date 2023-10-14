@@ -7,6 +7,10 @@ public interface MinecraftRepository {
 
   void selectPlayer(String nickname);
 
+  void setArgs(String[] value);
+
+  String[] getArgs();
+
   void setPassword(String value);
 
   String getPassword();

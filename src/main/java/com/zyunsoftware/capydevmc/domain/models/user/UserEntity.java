@@ -29,6 +29,13 @@ public class UserEntity extends Entity<UserModel, UserRepository> {
     return this;
   }
 
+  public UserEntity setApproved(boolean value) {
+    _model.approved = value;
+    save();
+
+    return this;
+  }
+
   public UserEntity changeBalance(int value) {
     _model.balance += value;
     save();

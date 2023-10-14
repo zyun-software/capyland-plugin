@@ -2,12 +2,14 @@ package com.zyunsoftware.capydevmc.domain.services;
 
 import java.util.List;
 
+import com.zyunsoftware.capydevmc.app.DependencyInjection;
 import com.zyunsoftware.capydevmc.domain.models.minecraft.MinecraftCoordinatesModel;
 import com.zyunsoftware.capydevmc.domain.models.minecraft.MinecraftRepository;
 import com.zyunsoftware.capydevmc.domain.models.session.SessionRepository;
 import com.zyunsoftware.capydevmc.domain.models.user.UserEntity;
 import com.zyunsoftware.capydevmc.domain.models.user.UserModel;
 import com.zyunsoftware.capydevmc.domain.models.user.UserRepository;
+import com.zyunsoftware.capydevmc.infrastructure.utilities.ConfigUtility;
 
 public class AuthorizationService {
   private MinecraftRepository _minecraftRepository;
@@ -26,6 +28,26 @@ public class AuthorizationService {
 
   public MinecraftRepository getMinecraftRepository() {
     return _minecraftRepository;
+  }
+
+  public void setApproved(String nickname, boolean approved) {
+    UserRepository userRepository = DependencyInjection.getUserRepository();
+    UserEntity userEntity = userRepository.findByNickname(nickname);
+    if (userEntity == null) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.hidden-command.approve-player.not-found"));
+      return;
+    }
+
+    UserModel userModel = userEntity.getModel();
+    if (userModel.approved == approved) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.hidden-command.approve-player.not-changed"));
+      return;
+    }
+
+    userEntity.setApproved(approved);
+
+    String message = ConfigUtility.getString("message.hidden-command.approve-player." + (approved ? "approved" : "canceled"));
+    _minecraftRepository.showMessage(message);
   }
 
   public void teleportToMain() {
@@ -89,6 +111,21 @@ public class AuthorizationService {
   }
 
   public void register() {
+    String[] args = _minecraftRepository.getArgs();
+
+    if (args.length != 2) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.command.register.args"));
+      return;
+    }
+    
+    String password = args[0];
+    String confirmPassword = args[1];
+
+    if (!password.equals(confirmPassword)) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.command.register.different-passwords"));
+      return;
+    }
+
     _sessionRepository.load();
     String nickname = _minecraftRepository.getNickname();
     UserEntity userEntity = _userRepository.findByNickname(nickname);
@@ -97,6 +134,8 @@ public class AuthorizationService {
       return;
     }
 
+    _minecraftRepository.setPassword(password);
+
     UserModel userModel = new UserModel();
 
     userModel.nickname = nickname;
@@ -104,10 +143,19 @@ public class AuthorizationService {
 
     _userRepository.save(userModel);
 
+    _minecraftRepository.setArgs(new String[] { password });
+
     login();
   }
 
   public void login() {
+    String[] args = _minecraftRepository.getArgs();
+
+    if (args.length != 1) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.command.login.args"));
+      return;
+    }
+
     _sessionRepository.load();
     String nickname = _minecraftRepository.getNickname();
     UserEntity userEntity = _userRepository.findByNickname(nickname);
@@ -124,6 +172,7 @@ public class AuthorizationService {
       return;
     }
 
+    _minecraftRepository.setPassword(args[0]);
     String password = _minecraftRepository.getPassword();
     boolean auditPassword = userEntity.auditPassword(password);
 
@@ -156,6 +205,51 @@ public class AuthorizationService {
     _sessionRepository.remove(nickname);
 
     controlSelected();
+  }
+
+  public void changePassword() {
+    String[] args = _minecraftRepository.getArgs();
+
+    if (args.length != 3) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.command.change-password.args"));
+      return;
+    }
+    
+    String newPassword = args[0];
+    String confirmNewPassword = args[1];
+    String oldPassword = args[2];
+
+    if (!newPassword.equals(confirmNewPassword)) {
+      _minecraftRepository.showMessage(ConfigUtility.getString("message.command.register.different-passwords"));
+      return;
+    }
+
+    _sessionRepository.load();
+    String nickname = _minecraftRepository.getNickname();
+    String ip = _minecraftRepository.getIp();
+    boolean hasActiveSession = _sessionRepository.has(nickname, ip);
+    if (!hasActiveSession) {
+      _minecraftRepository.showMessage(_minecraftRepository.getConfigString("message.command.logout.unauthorized"));
+      return;
+    }
+
+    UserEntity userEntity = _userRepository.findByNickname(nickname);
+
+    _minecraftRepository.setPassword(oldPassword);
+
+    String password = _minecraftRepository.getPassword();
+    boolean auditPassword = userEntity.auditPassword(password);
+    if (!auditPassword) {
+      _minecraftRepository.showMessage(_minecraftRepository.getConfigString("message.command.login.invalid-password"));
+      return;
+    }
+
+    _minecraftRepository.setPassword(newPassword);
+    password = _minecraftRepository.getPassword();
+
+    userEntity.setPassword(password);
+
+    _minecraftRepository.showMessage(ConfigUtility.getString("message.command.change-password.changed"));
   }
 
   public void controlAll() {
@@ -211,6 +305,10 @@ public class AuthorizationService {
     }
 
     if (!userEntity.getModel().approved && !inLobby) {
+      _minecraftRepository.showTitle(
+        _minecraftRepository.getConfigString("title.portal.unapproved"), 
+        "", 0, 5, 0
+      );
       _toLobby(userEntity);
     }
   }

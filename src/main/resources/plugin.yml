@@ -18,10 +18,15 @@ commands:
     description: Авторизація
     usage: /login <пароль>
 
-  logout:
+  вихід:
     description: Вийти
-    usage: /logout
+    usage: /вихід
 
-  lobby:
+  до_лобі:
     description: Повернутися до лобі
-    usage: /lobby
+    usage: /до_лобі
+
+  змінити_пароль:
+    description: Зміна паролю
+    usage: /змінити_пароль <новий пароль> <повторення нового паролю> <старий пароль>
+  

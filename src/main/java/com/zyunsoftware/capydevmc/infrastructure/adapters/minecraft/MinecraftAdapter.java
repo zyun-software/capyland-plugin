@@ -22,6 +22,7 @@ import net.kyori.adventure.text.Component;
 public class MinecraftAdapter implements MinecraftRepository {
   private Player _player;
   private String _password = "";
+  private String[] _args = {};
 
   @Override
   public List<String> getOnlineNicknames() {
@@ -151,5 +152,15 @@ public class MinecraftAdapter implements MinecraftRepository {
   public String getConfigString(String key) {
     String result = ConfigUtility.getString(key);
     return result;
+  }
+
+  @Override
+  public void setArgs(String[] value) {
+    _args = value;
+  }
+
+  @Override
+  public String[] getArgs() {
+    return _args;
   }
 }

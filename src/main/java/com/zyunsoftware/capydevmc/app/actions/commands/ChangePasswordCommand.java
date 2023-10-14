@@ -10,11 +10,11 @@ import com.zyunsoftware.capydevmc.domain.models.minecraft.MinecraftRepository;
 import com.zyunsoftware.capydevmc.domain.services.AuthorizationService;
 import com.zyunsoftware.capydevmc.infrastructure.utilities.ConfigUtility;
 
-public class RegisterCommand implements CommandExecutor {
+public class ChangePasswordCommand implements CommandExecutor {
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (!(sender instanceof Player)) {
-      sender.sendMessage(ConfigUtility.getString("message.command.register.console"));
+      sender.sendMessage(ConfigUtility.getString("message.command.change-password.console"));
       return true;
     }
 
@@ -24,7 +24,7 @@ public class RegisterCommand implements CommandExecutor {
     minecraftRepository.selectPlayer(sender.getName());
     minecraftRepository.setArgs(args);
 
-    authorizationService.register();
+    authorizationService.changePassword();
 
     return true;
   }
