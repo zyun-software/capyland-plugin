@@ -1,36 +1,61 @@
-mysql.url: jdbc:mysql://localhost:3306/db
-mysql.user: root
-mysql.password: secret
+mysql:
+  url: jdbc:mysql://localhost:3306/db
+  user: root
+  password: secret
 
-world.lobby: world_auth
-world.main: world
+world:
+  lobby: world_auth
+  main: world
 
-title.register.text: §6Потрібна реєстрація
-title.register.sub: §aВведіть §6/register §r§6<пароль> <повтор пароля>
-title.login.text: §6Потрібна авторизація
-title.login.sub: §aВведіть §6/login §6<пароль>
-title.login.success.text: §aВи успішно авторизувалися
-title.login.success.sub: §6Пройдіть в портал для телепортації в основний світ
-title.portal.unapproved: §cВашого персонажа не підтверджено
-title.lobby: §cВи вже в лобі
+api:
+  url: https://example.com/
+  token: secret
 
-message.command.plugins: Список плагінів недоступний
-message.command.help: Текст довідки
-message.command.register.console: Зареєструватися може лише гравець!
-message.command.register.args: §cБудь ласка, введіть пароль і повторіть його.
-message.command.register.different-passwords: §cПаролі не співпадають. Будь ласка, введіть однакові паролі.
-message.command.register.already-registered: §cВи вже зареєстровані.
-message.command.login.console: Авторизуватися може лише гравець!
-message.command.login.args: §cБудь ласка, введіть пароль.
-message.command.login.registration-is-required: §cНеобхідно зареєструватися.
-message.command.login.already-authorized: §cВи вже авторизовані.
-message.command.login.invalid-password: §cПароль не вірний.
-message.command.logout.console: Вийти може лише гравець!
-message.command.logout.unauthorized: §cВи не авторизовані.
-message.command.lobby.console: Повернутися до лобі може лише гравець!
-message.command.change-password.args: §cБудь ласка, введіть пароль, повторіть його і старий пароль.
-message.command.change-password.changed: §aПароль змінено.
-message.hidden-command.approve-player.not-found: §cГравця для підтвердження не знайдено.
-message.hidden-command.approve-player.approved: §aГравця підтверджено.
-message.hidden-command.approve-player.canceled: §aПідтвердження гравця скасовано.
-message.hidden-command.approve-player.not-changed: §cПідтвердження гравця не було змінено.
+title:
+  register:
+    text: §6Потрібна реєстрація
+    sub: §aВведіть §6/register §r§6<пароль> <повтор пароля>
+  login:
+    text: §6Потрібна авторизація
+    sub: §aВведіть §6/login §6<пароль>
+  portal:
+    unapproved: §cВашого персонажа не підтверджено
+  lobby: §cВи вже в лобі
+
+message:
+  command:
+    plugins: Список плагінів недоступний
+    help: Текст довідки
+    register:
+      console: Зареєструватися може лише гравець!
+      args: §c/register <пароль> <повторення паролю>
+      different-passwords: §cПаролі не співпадають. Будь ласка, введіть однакові паролі.
+      already-registered: §cВи вже зареєстровані.
+    login:
+      console: Авторизуватися може лише гравець!
+      args: §c/login <пароль>
+      registration-is-required: §cНеобхідно зареєструватися.
+      already-authorized: §cВи вже авторизовані.
+      invalid-password: §cПароль не вірний.
+      success: |
+        §aВи успішно авторизувалися
+        §6Пройдіть в портал для телепортації в основний світ
+    logout:
+      console: Вийти може лише гравець!
+      unauthorized: §cВи не авторизовані.
+    lobby:
+      console: Повернутися до лобі може лише гравець!
+    change-password:
+      args: §c/змінити_пароль <новий пароль> <повторення нового паролю> <старий пароль>
+      changed: §aПароль змінено.
+    discord:
+      console: 'Прив''язати обліковий запис Discord може тільки гравець!'
+      args: §c/діскорд <код> <пароль>
+      success: '§aDiscord прив''язано'
+      error: '§cПомилка прив''язки Discord'
+    hidden-command:
+      approve-player:
+        not-found: §cГравця для підтвердження не знайдено.
+        approved: §aГравця підтверджено.
+        canceled: §aПідтвердження гравця скасовано.
+        not-changed: §cПідтвердження гравця не було змінено.

@@ -92,11 +92,14 @@ public class MinecraftAdapter implements MinecraftRepository {
 
   @Override
   public void showMessage(String text) {
+    text = getConfigString(text);
     _player.sendMessage(text);
   }
 
   @Override
   public void showTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    title = getConfigString(title);
+    subtitle = getConfigString(subtitle);
     TitleUtility.sendTitle(_player, title, subtitle, fadeIn, stay, fadeOut);
   }
 

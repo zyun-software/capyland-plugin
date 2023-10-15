@@ -54,6 +54,7 @@ public class MigrationAdapter implements MigrationRepository {
         + "code VARCHAR(255) NOT NULL,"
         + "name VARCHAR(255) NOT NULL,"
         + "PRIMARY KEY (user_id, code, name),"
+        + "UNIQUE KEY unique_code (code),"
         + "FOREIGN KEY (user_id) REFERENCES capyland_users(id)"
         + ");"
       };

@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.zyunsoftware.capydevmc.app.actions.commands.ChangePasswordCommand;
+import com.zyunsoftware.capydevmc.app.actions.commands.DiscordCommand;
 import com.zyunsoftware.capydevmc.app.actions.commands.LobbyCommand;
 import com.zyunsoftware.capydevmc.app.actions.commands.LoginCommand;
 import com.zyunsoftware.capydevmc.app.actions.commands.LogoutCommand;
@@ -15,8 +16,12 @@ import com.zyunsoftware.capydevmc.app.actions.listeners.AuthorizationListener;
 import com.zyunsoftware.capydevmc.app.actions.listeners.ChatCommandsOpListener;
 import com.zyunsoftware.capydevmc.app.actions.listeners.ServerCommandOverwritingListener;
 
+import net.dv8tion.jda.api.JDA;
+
 public class CapylandPlugin extends JavaPlugin {
   private static CapylandPlugin _instancePlugin;
+
+  private JDA jda;
 
   private Logger _logger;
 
@@ -41,6 +46,7 @@ public class CapylandPlugin extends JavaPlugin {
     getCommand("вихід").setExecutor(new LogoutCommand());
     getCommand("до_лобі").setExecutor(new LobbyCommand());
     getCommand("змінити_пароль").setExecutor(new ChangePasswordCommand());
+    getCommand("діскорд").setExecutor(new DiscordCommand());
 
     new BukkitRunnable() {
       @Override
@@ -53,6 +59,10 @@ public class CapylandPlugin extends JavaPlugin {
   @Override
   public void onDisable() {
     _logger.info("Плагін вимкнено.");
+  }
+
+  public JDA getJDA() {
+      return jda;
   }
 
   public static CapylandPlugin getInstance() {
