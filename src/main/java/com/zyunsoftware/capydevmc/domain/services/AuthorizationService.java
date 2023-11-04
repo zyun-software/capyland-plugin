@@ -37,6 +37,18 @@ public class AuthorizationService {
     return _minecraftRepository;
   }
 
+  public boolean audit() {
+    _sessionRepository.load();
+    String nickname = _minecraftRepository.getNickname();
+    String ip = _minecraftRepository.getIp();
+    boolean hasActiveSession = _sessionRepository.has(nickname, ip);
+    if (!hasActiveSession) {
+      return false;
+    }
+
+    return true;
+  }
+
   public void discord() {
     String[] args = _minecraftRepository.getArgs();
     if (args.length != 2) {

@@ -1,6 +1,5 @@
 package com.zyunsoftware.capydevmc.app.actions.listeners;
 
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,14 +25,19 @@ public class AuthorizationListener implements Listener {
 
     @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event) {
-      if (event.getTo().getWorld().getEnvironment() == World.Environment.NETHER) {
+      Player player = event.getPlayer();
+      AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
+      MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
+      minecraftRepository.selectPlayer(player.getName());
+
+      boolean inLobby = minecraftRepository.inLobby();
+
+      if (inLobby) {
         event.setCancelled(true);
+      }
 
-        Player player = event.getPlayer();
-
-        AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
-        MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
-        minecraftRepository.selectPlayer(player.getName());
+      boolean isAuthorized = authorizationService.audit();
+      if (isAuthorized) {
         authorizationService.teleportToMain();
       }
     }

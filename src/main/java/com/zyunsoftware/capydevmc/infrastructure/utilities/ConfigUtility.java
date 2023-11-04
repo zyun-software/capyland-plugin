@@ -1,5 +1,7 @@
 package com.zyunsoftware.capydevmc.infrastructure.utilities;
 
+import java.util.Set;
+
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.zyunsoftware.capydevmc.app.CapylandPlugin;
@@ -13,5 +15,17 @@ public class ConfigUtility {
     String result = _getConfig().getString(key, key);
 
     return result;
+  }
+
+  public static String getString(String key, String def) {
+    String result = _getConfig().getString(key, def);
+
+    return result;
+  }
+
+  public static Set<String> getKeys(String key) {
+    return _getConfig()
+      .getConfigurationSection(key)
+      .getKeys(false);
   }
 }

@@ -5,31 +5,12 @@ author: ZyunSoftware - CapyDevMC
 main: com.zyunsoftware.capydevmc.app.CapylandPlugin
 description: Основний плагін Долини Капібар
 
-depends:
-  - Multiverse-Core
-  - TAB
-
 commands:
-  register:
-    description: Реєстрація
-    usage: /register <пароль> <повторення паролю>
+  api:
+    description: Робота з API
+    usage: /api
 
-  login:
-    description: Авторизація
-    usage: /login <пароль>
+  перезавантажити_конфігураційний_файл:
+    description: Перезавантаження конфігураційного файлу
+    usage: /перезавантажити_конфігураційний_файл
 
-  вихід:
-    description: Вийти
-    usage: /вихід
-
-  до_лобі:
-    description: Повернутися до лобі
-    usage: /до_лобі
-
-  змінити_пароль:
-    description: Зміна паролю
-    usage: /змінити_пароль <новий пароль> <повторення нового паролю> <старий пароль>
-
-  діскорд:
-    description: Прив'язка облікового запису Discord
-    usage: /діскорд <код> <пароль>
