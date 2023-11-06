@@ -77,7 +77,7 @@ public class ApiCommand implements CommandExecutor, TabCompleter {
       player.getName() + "&&" +
       (itemInMainHand == null ? "0" : itemInMainHand.getAmount()) + "&&" +
       String.join(" ", Arrays.copyOfRange(args, 1, args.length)) +
-      "&&" + String.join("`", lores);
+      "&&" + String.join("``", lores);
 
     String response = _sendPostRequest(url, token, data);
 
@@ -170,6 +170,10 @@ public class ApiCommand implements CommandExecutor, TabCompleter {
           completions.add(key);
         }
       }
+      String com = "прибрати_лор";
+      if (player.isOp() && com.startsWith(args[0].toLowerCase())) {
+        completions.add(com);
+      }
     } else if (args.length > 1) {
       String api = args[0];
       String url = ConfigUtility.getString("api-chat." + api + ".url", null);
@@ -233,7 +237,8 @@ public class ApiCommand implements CommandExecutor, TabCompleter {
       Component line = lore.get(i);
       result.add(LegacyComponentSerializer.legacyAmpersand()
         .serialize(line)
-        .replaceAll("§.", ""));
+        .replaceAll("§.", "")
+        .replaceAll("&.", ""));
     }
 
     return String.join("`", result);
