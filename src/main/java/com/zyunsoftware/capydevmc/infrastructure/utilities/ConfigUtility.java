@@ -23,6 +23,12 @@ public class ConfigUtility {
     return result;
   }
 
+  public static int getInt(String key) {
+    int result = _getConfig().getInt(key, 0);
+
+    return result;
+  }
+
   public static Set<String> getKeys(String key) {
     return _getConfig()
       .getConfigurationSection(key)
