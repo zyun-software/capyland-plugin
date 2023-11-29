@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import com.zyunsoftware.capydevmc.app.CapylandPlugin;
 import com.zyunsoftware.capydevmc.infrastructure.utilities.ConfigUtility;
 
 import io.papermc.paper.chat.ChatRenderer;
@@ -38,7 +37,7 @@ public class ChatListener implements Listener {
       .replace("<" + nickname + "> ", "")
       .trim(), player);
 
-    String lettersToCheck = "ЁЪЫЭ";
+    /*String lettersToCheck = "ЁЪЫЭ";
 
     String lowercaseText = text.toLowerCase();
     String lowercaseLettersToCheck = lettersToCheck.toLowerCase();
@@ -56,7 +55,7 @@ public class ChatListener implements Listener {
 
         return;
       }
-    }
+    }*/
 
     if (text.startsWith("!")) {
       event.renderer(new ChatRenderer() {

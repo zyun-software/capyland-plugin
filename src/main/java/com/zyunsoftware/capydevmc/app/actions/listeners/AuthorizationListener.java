@@ -1,44 +1,70 @@
 package com.zyunsoftware.capydevmc.app.actions.listeners;
 
-import org.bukkit.entity.Player;
+import java.net.InetAddress;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 
-import com.zyunsoftware.capydevmc.app.DependencyInjection;
-import com.zyunsoftware.capydevmc.domain.models.minecraft.MinecraftRepository;
-import com.zyunsoftware.capydevmc.domain.services.AuthorizationService;
+import com.zyunsoftware.capydevmc.app.CapylandPlugin;
+
+import net.kyori.adventure.text.Component;
 
 public class AuthorizationListener implements Listener {
-    @EventHandler
+  /*@EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-      Player player = event.getPlayer();
+    Player player = event.getPlayer();
 
-      AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
-      MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
+    if (!CapylandPlugin.getInstance().hasIP(player.getName(), player.getAddress().getAddress().getHostAddress())) {
+      Bukkit.getScheduler().runTaskLater(CapylandPlugin.getInstance(), () -> {
+        player.kick(Component.text("§cЦя сесія не авторизована"));
+      } , 20L);
+    }
+  }*/
 
-      minecraftRepository.selectPlayer(player.getName());
+  @EventHandler
+  public void onPlayerLogin(PlayerLoginEvent event) {
+    InetAddress ipAddress = event.getRealAddress();
 
-      authorizationService.controlSelected();
+    if (ipAddress != null) {
+      String ipAddressString = ipAddress.getHostAddress();
+
+      if (!CapylandPlugin.getInstance().hasIP(event.getPlayer().getName(), ipAddressString)) {
+        event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Component.text("§cЦя сесія не авторизована"));
+      }
+    } else {
+      event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Component.text("§cПомилка під час отримання IP-адреси"));
+    }
+  }
+
+  /*@EventHandler
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    Player player = event.getPlayer();
+
+    AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
+    MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
+
+    minecraftRepository.selectPlayer(player.getName());
+
+    authorizationService.controlSelected();
+  }
+
+  @EventHandler
+  public void onPlayerPortal(PlayerPortalEvent event) {
+    Player player = event.getPlayer();
+    AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
+    MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
+    minecraftRepository.selectPlayer(player.getName());
+
+    boolean inLobby = minecraftRepository.inLobby();
+
+    if (inLobby) {
+      event.setCancelled(true);
     }
 
-    @EventHandler
-    public void onPlayerPortal(PlayerPortalEvent event) {
-      Player player = event.getPlayer();
-      AuthorizationService authorizationService = DependencyInjection.getAuthorizationService();
-      MinecraftRepository minecraftRepository = authorizationService.getMinecraftRepository();
-      minecraftRepository.selectPlayer(player.getName());
-
-      boolean inLobby = minecraftRepository.inLobby();
-
-      if (inLobby) {
-        event.setCancelled(true);
-      }
-
-      boolean isAuthorized = authorizationService.audit();
-      if (isAuthorized) {
-        authorizationService.teleportToMain();
-      }
+    boolean isAuthorized = authorizationService.audit();
+    if (isAuthorized) {
+      authorizationService.teleportToMain();
     }
+  }*/
 }

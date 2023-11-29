@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -67,7 +68,9 @@ public class JailListener implements Listener {
 
     ItemStack result = determineAnvilResult(items);
 
-    event.setResult(result);
+    if (result.getType() != Material.AIR) {
+      event.setResult(result);
+    }
   }
 
   @EventHandler
@@ -75,7 +78,7 @@ public class JailListener implements Listener {
     if (event.getInventory().getType() == InventoryType.ANVIL) {
       if (event.getSlotType() == InventoryType.SlotType.RESULT) {
         ItemStack resultItem = event.getCurrentItem();
-        if (resultItem != null && resultItem.getType() == Material.PAPER && resultItem.hasItemMeta()) {
+        if (resultItem != null && resultItem.getType() == Material.PAPER && _getFl(resultItem).equals("Шокер")) {
           ItemMeta meta = resultItem.getItemMeta();
           if (
             meta.hasDisplayName() &&
@@ -177,10 +180,6 @@ public class JailListener implements Listener {
       !_isMaterialInMainHand(attacker, Material.PAPER) ||
       lore.size() == 0 || item == null || item.getAmount() != 1 ||
       meta == null || lore == null) {
-      if (item.getAmount() != 1) {
-        attacker.sendMessage("§сВ руках повинен бути тільки один предмет");
-      }
-
       return;
     }
 
@@ -303,6 +302,19 @@ public class JailListener implements Listener {
 
     if (_jail.contains(nickname)) {
       player.sendMessage("§eВи у в'язниці");
+    }
+  }
+
+  @EventHandler
+  public void onPlayerQuit(PlayerQuitEvent event) {
+    Player player = event.getPlayer();
+    String nickname = player.getName();
+
+    if (_locked.contains(nickname)) {
+      if (!_isBoundTarget(nickname)) {
+        _bound.add(nickname + ":" + nickname);
+        FileUtility.write(_boundFileName, _bound);
+      }
     }
   }
 
